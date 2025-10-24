@@ -1,16 +1,35 @@
-# transparent_wallet
+# Transparent Wallet
 
-A new Flutter project.
+Transparent Wallet delivers a cross-platform Flutter experience backed by a Rust
+FFI layer so users can inspect and manage on-chain balances with full
+provenance.
 
-## Getting Started
+## Project Overview
 
-This project is a starting point for a Flutter application.
+- Flutter UI lives under `lib/src/`, with feature modules in `lib/src/<feature>`
+  and shared components in `lib/src/common`.
+- Rust FFI exports reside in `rust/src/api`; regenerate bindings with
+  `dart run flutter_rust_bridge:generate` whenever APIs change.
+- Packaged Rust binaries are produced by the `rust_builder/` tooling for mobile
+  targets.
 
-A few resources to get you started if this is your first Flutter project:
+## Development Quickstart
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```bash
+flutter pub get
+flutter analyze
+flutter test
+cargo test --manifest-path rust/Cargo.toml
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Run features on devices or emulators with `flutter run --dart-define=...`.
+- Keep Flutter code formatted via `dart format .`; format Rust via `cargo fmt --all`.
+- Integration journeys belong in `integration_test/`; Rust unit tests sit next
+  to their implementations.
+
+## Governance
+
+All work MUST comply with the project constitution in
+`.specify/memory/constitution.md`. Plans, specs, and task lists are expected to
+document ledger transparency, custody, parity, FFI, and observability
+considerations before implementation begins.

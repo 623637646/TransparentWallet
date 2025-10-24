@@ -11,13 +11,16 @@
   IMPORTANT: User stories should be PRIORITIZED as user journeys ordered by importance.
   Each user story/journey must be INDEPENDENTLY TESTABLE - meaning if you implement just ONE of them,
   you should still have a viable MVP (Minimum Viable Product) that delivers value.
-  
+
   Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
   Think of each story as a standalone slice of functionality that can be:
   - Developed independently
   - Tested independently
   - Deployed independently
   - Demonstrated to users independently
+
+  For Transparent Wallet, every story MUST address ledger transparency, custody/privacy impact,
+  and cross-platform parity expectations called out in the constitution.
 -->
 
 ### User Story 1 - [Brief Title] (Priority: P1)
@@ -68,37 +71,39 @@
 ### Edge Cases
 
 <!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right edge cases.
+  ACTION REQUIRED: Capture ledger, custody, and parity risks here.
 -->
 
-- What happens when [boundary condition]?
-- How does system handle [error scenario]?
+- How does the flow behave if the ledger node is unreachable or returns stale data?
+- What is the user experience when secure storage access fails or is revoked?
+- How are parity gaps handled when a capability is missing on one platform?
+- What recovery path exists if an FFI call panics or returns an unexpected error?
 
 ## Requirements *(mandatory)*
 
 <!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right functional requirements.
+  ACTION REQUIRED: Replace each placeholder with concrete, testable requirements.
+  Requirements MUST cite how they respect constitution principles (transparency,
+  custody, parity, FFI discipline, observability).
 -->
 
 ### Functional Requirements
 
-- **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
-- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
-- **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
-- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
-- **FR-005**: System MUST [behavior, e.g., "log all security events"]
+- **FR-001**: Wallet MUST surface ledger-sourced data for [feature] with documented provenance.
+- **FR-002**: Private keys and signing material MUST remain on-device; no remote transmission.
+- **FR-003**: iOS, Android, and web MUST expose equivalent UI and error handling for this flow.
+- **FR-004**: Rust FFI MUST provide `[function_name]` returning `[DTO]`; bindings regenerated via `flutter_rust_bridge`.
+- **FR-005**: Metrics/logging MUST record [event] without leaking PII and ship to approved sinks.
 
 *Example of marking unclear requirements:*
 
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **FR-006**: Ledger update frequency MUST be [NEEDS CLARIFICATION: e.g., "every 30s"] to satisfy transparency.
+- **FR-007**: Android secure storage fallback MUST be [NEEDS CLARIFICATION: e.g., "StrongBox"] or parity exception filed.
 
 ### Key Entities *(include if feature involves data)*
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+- **[Entity 1]**: [Ledger DTO, e.g., `AccountSnapshot` with fields and provenance notes]
+- **[Entity 2]**: [UI model mirroring DTO, mapping rationale, platform overrides]
 
 ## Success Criteria *(mandatory)*
 
@@ -109,7 +114,7 @@
 
 ### Measurable Outcomes
 
-- **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
-- **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
-- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
-- **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+- **SC-001**: [e.g., "User completes transfer with confirmed ledger update in ≤60s on reference devices"]
+- **SC-002**: [e.g., "Parity validation passes on iOS + Android + web with no blocking gaps"]
+- **SC-003**: [e.g., "`flutter test` + integration scenario for this feature passes in CI within 5 min"]
+- **SC-004**: [e.g., "No PII captured in telemetry events; observability dashboard confirms signals"]

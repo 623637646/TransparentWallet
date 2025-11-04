@@ -647,9 +647,9 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 
 [[package]]
 name = "rx-rust"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7d4d92f0441ddb00e0fcc1cc1f55a97765295c2f6b486c55959a6e785904471"
+checksum = "46d88dd0212b0f4a749b1750ac3b3aceebcbb807967991be35846feaf72851da"
 dependencies = [
  "cfg-if",
  "educe",

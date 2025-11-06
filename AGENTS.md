@@ -1,34 +1,33 @@
 # Repository Guidelines
 
-Transparent Wallet pairs a Flutter client with a Rust library via flutter_rust_bridge.
-
 ## Project Structure & Module Organization
-- Flutter app source sits under `lib/`; shared UI flows live in `lib/src`.
-- Rust bindings generated in `lib/src/rust` — do not edit files in it.
-- Native Rust crate lives in `rust/` (`src/api` for exported functions, `src/lib.rs` entry point).
-- Tests: widget/unit under `test/`, integration flows in `integration_test/`, platform shells under `android/`, `ios/`, plus `rust_builder/` for the packaged Rust binaries.
+- Flutter client code lives in `lib/`; shared widgets and flows are under `lib/src`.
+- Generated Rust bindings reside in `lib/src/rust`; treat these files as read-only.
+- The native Rust crate is in `rust/` (`rust/src/api` exposes FFI functions, `rust/src/lib.rs` is the entry point).
+- Tests mirror runtime code: Dart unit and widget tests in `test/`, integration flows under `integration_test/`, and platform shells in `android/`, `ios/`, plus `rust_builder/` for packaged Rust binaries.
 
 ## Build, Test, and Development Commands
-- `flutter pub get` installs Dart dependencies before any build.
-- `flutter run --dart-define=...` runs the app on a connected device or emulator.
-- `flutter test` executes Dart unit/widget tests; add `--coverage` when collecting reports.
-- `flutter analyze` enforces the `flutter_lints` ruleset.
-- `cargo test --manifest-path rust/Cargo.toml` validates the Rust crate.
-- `dart run flutter_rust_bridge:generate` regenerates bridge code after editing `rust/src/api`.
+- `flutter pub get` installs Dart dependencies; run after editing `pubspec.yaml`.
+- `flutter test` executes Dart unit and widget suites (`flutter test --coverage` for reports).
+- `flutter analyze` applies the `flutter_lints` ruleset across the Dart sources.
+- `cargo test --manifest-path rust/Cargo.toml` validates the Rust crate and its FFI surface.
+- `dart run flutter_rust_bridge:generate` regenerates bindings after changing `rust/src/api`.
+- `flutter run --dart-define=ENV=prod` launches the app on a connected device or emulator with overrides.
 
 ## Coding Style & Naming Conventions
-- Follow Flutter defaults: 2-space indentation, UpperCamelCase for classes, lowerCamelCase for members.
-- Keep Dart files formatted with `dart format .`; Rust code uses `cargo fmt --all`.
-- Exported Rust functions should remain snake_case, mirroring generated Dart methods living in `lib/src/rust/api`.
-- Co-locate new feature code under `lib/src/<feature>` and expose Rust FFI APIs through `api/` modules.
+- Use Flutter defaults: 2-space indentation, UpperCamelCase for classes, lowerCamelCase for members.
+- Keep Rust functions exported over FFI in snake_case to align with generated Dart names.
+- Format Dart with `dart format .` and Rust with `cargo fmt --all` before committing.
+- Place new feature code in `lib/src/<feature>` and expose Rust APIs through `lib/src/rust/api`.
 
 ## Testing Guidelines
-- Write Dart tests in files suffixed `_test.dart`; mirror package paths.
-- Place integration scenarios in `integration_test/` and drive them with `flutter test integration_test`.
-- Rust logic requires unit tests alongside implementations using `#[cfg(test)]`; prefer exercising FFI-safe types.
+- Name Dart test files with the `_test.dart` suffix and mirror source paths.
+- Integration scenarios belong in `integration_test/`; run via `flutter test integration_test`.
+- Add Rust unit tests alongside implementations using `#[cfg(test)]` to exercise FFI-safe types.
+- Aim to keep widget tests deterministic by mocking platform channels and network calls.
 
 ## Commit & Pull Request Guidelines
-- Craft concise, present-tense commit subjects (`Add wallet list view`); keep body wrapped at 72 chars when needed.
-- Reference linked issues or specs in PR descriptions and note platform/device coverage of manual testing.
-- Attach screenshots or logs for UI-affecting changes; call out migrations or schema updates explicitly.
-- Ensure PRs pass `flutter analyze`, `flutter test`, and `cargo test` before requesting review.
+- Write commits in present tense (e.g., `Add wallet list view`) with concise bodies when needed.
+- Confirm `flutter analyze`, `flutter test`, and `cargo test` all pass before requesting review.
+- PR descriptions should link relevant issues, list tested platforms/devices, and attach UI screenshots when layouts change.
+- Call out migrations, schema updates, or new configuration steps explicitly so reviewers can verify them.

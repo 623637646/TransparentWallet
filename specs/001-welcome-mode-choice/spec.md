@@ -11,6 +11,11 @@
 - Deliver a modern, swipeable onboarding experience that culminates in selecting cold or hot wallet mode.
 - Persist the chosen mode and surface aligned messaging on the home screen for future sessions, respecting cold-wallet isolation promises.
 
+## Clarifications
+
+### Session 2025-11-06
+- Q: Should users be able to “skip” the onboarding prior to choosing a mode? → A: Require swiping through each panel before mode selection
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Learn About Transparent Wallet (Priority: P1)
@@ -70,6 +75,7 @@ Returning users expect the chosen mode to shape their home experience without re
 
 ### Functional Requirements
 
+- **FR-002a**: The onboarding flow MUST disable “Skip” shortcuts; users advance sequentially via Back/Next swipes or buttons until the mode-selection panel is reached.
 - **FR-001**: On the first launch of a fresh install, the temporary home screen MUST be replaced by a multi-panel welcome experience that introduces Transparent Wallet’s transparent ledger audits, QR signing, and cold/hot collaboration.
 - **FR-002**: The onboarding flow MUST adopt a modern mobile pattern (e.g., horizontal swipe with progress indicator and prominent CTA) that works with touch, keyboard focus, and screen readers across iOS, Android, and Flutter web.
 - **FR-003**: All onboarding content, CTAs, and confirmations MUST ship in English and Simplified Chinese simultaneously, with layout accommodating both languages without truncation.

@@ -78,6 +78,9 @@ description: "Task list for Welcome Mode Choice Onboarding"
 
 - [ ] T019 [P] [US2] Add Rust unit test covering mode persistence logic in `rust/src/onboarding/view_model.rs`
 - [ ] T020 [P] [US2] Add Flutter unit test validating storage writes in `test/onboarding/mode_selection_test.dart`
+- [ ] T028 [P] [US2] Add cold mode isolation test ensuring hot services stay disabled in `test/onboarding/cold_mode_isolation_test.dart`
+- [ ] T030 [P] [US2] Add unit test verifying first-run completion flag in `test/onboarding/first_run_completion_test.dart`
+- [ ] T032 [P] [US2] Add telemetry unit test for onboarding completion event in `test/onboarding/onboarding_completed_event_test.dart`
 
 ### Implementation for User Story 2
 
@@ -87,6 +90,9 @@ description: "Task list for Welcome Mode Choice Onboarding"
 - [ ] T024 [US2] Build final mode choice panel with reduced-motion handling in `lib/src/onboarding/views/mode_choice_panel.dart`
 - [ ] T025 [US2] Emit `mode_selected` analytics event in `lib/src/common/analytics/onboarding_events.dart`
 - [ ] T026 [US2] Surface confirmation messaging for cold and hot modes in `lib/src/onboarding/views/onboarding_carousel_page.dart`
+- [ ] T027 [US2] Gate hot-only services when mode is cold in `lib/src/common/app_bootstrap.dart`
+- [ ] T029 [US2] Persist `FirstRunState` completion when onboarding finishes in `lib/src/onboarding/state/onboarding_state.dart`
+- [ ] T031 [US2] Emit `onboarding_completed` analytics event upon first completion in `lib/src/common/analytics/onboarding_events.dart`
 
 **Checkpoint**: User Story 2 stores mode choice securely and informs users of connectivity implications
 
@@ -100,15 +106,15 @@ description: "Task list for Welcome Mode Choice Onboarding"
 
 ### Tests for User Story 3
 
-- [ ] T027 [P] [US3] Add integration test for onboarding skip + home messaging in `integration_test/onboarding_flow_test.dart`
+- [ ] T033 [P] [US3] Add integration test for onboarding skip + home messaging in `integration_test/onboarding_flow_test.dart`
 
 ### Implementation for User Story 3
 
-- [ ] T028 [US3] Guard app bootstrap to skip onboarding when `FirstRunState.has_completed` is true in `lib/src/app.dart`
-- [ ] T029 [US3] Update home screen headline and actions per mode in `lib/src/home/home_page.dart`
-- [ ] T030 [US3] Add “Learn about Transparent Wallet” entry to reopen onboarding in `lib/src/home/home_page.dart`
-- [ ] T031 [US3] Expose mode state stream for home widgets in `lib/src/onboarding/state/onboarding_state.dart`
-- [ ] T032 [US3] Log `onboarding_completed` analytics event post-skip in `lib/src/common/analytics/onboarding_events.dart`
+- [ ] T034 [US3] Guard app bootstrap to skip onboarding when `FirstRunState.has_completed` is true in `lib/src/app.dart`
+- [ ] T035 [US3] Update home screen headline and actions per mode in `lib/src/home/home_page.dart`
+- [ ] T036 [US3] Add “Learn about Transparent Wallet” entry to reopen onboarding in `lib/src/home/home_page.dart`
+- [ ] T037 [US3] Expose mode state stream for home widgets in `lib/src/onboarding/state/onboarding_state.dart`
+- [ ] T038 [US3] Log `onboarding_completed` analytics event post-skip in `lib/src/common/analytics/onboarding_events.dart`
 
 **Checkpoint**: Returning users see mode-specific home content without rerunning onboarding, but can review material on demand
 
@@ -116,11 +122,11 @@ description: "Task list for Welcome Mode Choice Onboarding"
 
 ## Phase N: Polish & Cross-Cutting Concerns
 
-- [ ] T033 Run `flutter gen-l10n` and review translations for truncation in `lib/l10n/`
-- [ ] T034 Audit screen reader labels and reduced-motion transitions across onboarding views in `lib/src/onboarding/views/`
-- [ ] T035 Update analytics dashboard documentation for onboarding metrics in `docs/analytics/onboarding_dashboard.md`
-- [ ] T036 Refresh quickstart instructions with latest debug flags in `specs/001-welcome-mode-choice/quickstart.md`
-- [ ] T037 Perform parity smoke test across iOS, Android, and web documenting results in `docs/testing/onboarding_parity.md`
+- [ ] T039 Run `flutter gen-l10n` and review translations for truncation in `lib/l10n/`
+- [ ] T040 Audit screen reader labels and reduced-motion transitions across onboarding views in `lib/src/onboarding/views/`
+- [ ] T041 Update analytics dashboard documentation for onboarding metrics in `docs/analytics/onboarding_dashboard.md`
+- [ ] T042 Refresh quickstart instructions with latest debug flags in `specs/001-welcome-mode_choice/quickstart.md`
+- [ ] T043 Perform parity smoke test across iOS, Android, and web documenting results in `docs/testing/onboarding_parity.md`
 
 ---
 
@@ -149,7 +155,7 @@ description: "Task list for Welcome Mode Choice Onboarding"
 - In Phase 2, storage (T005-T006) and Rust scaffolding (T007-T008) can progress in parallel before regeneration step
 - Within US1, DTO creation (T012) and widget test (T011) can proceed while UI work (T016) readies
 - US2 tests (T019-T020) and FFI work (T021-T022) can run in parallel with Flutter UI (T024) after foundations merge
-- US3 integration test (T027) can start once US2 tasks stabilize while home messaging (T029) develops
+- US3 integration test (T033) can start once US2 tasks stabilize while home messaging (T035) develops
 
 ### Parallel Example: User Story 2
 

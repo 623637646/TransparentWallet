@@ -1,0 +1,135 @@
+openapi: 3.0.3
+info:
+  title: Transparent Wallet Onboarding Contracts
+  version: 0.1.0
+  description: >
+    Local REST-style contract mirroring Rust FFI surface for onboarding carousel and mode selection.
+    Implemented via flutter_rust_bridge bindings; no remote transport.
+servers:
+  - url: bridge://onboarding
+paths:
+  /onboarding/slides:
+    get:
+      summary: Retrieve ordered onboarding slide content
+      operationId: getOnboardingSlides
+      responses:
+        '200':
+          description: Ordered slide payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingSlidesResponse'
+  /onboarding/mode:
+    post:
+      summary: Persist wallet mode selection
+      operationId: selectWalletMode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModeSelectionRequest'
+      responses:
+        '200':
+          description: Selection stored successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModeSelectionResponse'
+  /onboarding/complete:
+    post:
+      summary: Confirm onboarding completion and emit telemetry
+      operationId: completeOnboarding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardingCompletionRequest'
+      responses:
+        '200':
+          description: Completion acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingCompletionResponse'
+components:
+  schemas:
+    OnboardingSlidesResponse:
+      type: object
+      required: [slides, onboardingVersion]
+      properties:
+        onboardingVersion:
+          type: string
+          description: Static content version identifier.
+        slides:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/OnboardingSlide'
+    OnboardingSlide:
+      type: object
+      required: [id, titleKey, bodyKey, illustrationAsset, order]
+      properties:
+        id:
+          type: string
+        titleKey:
+          type: string
+        bodyKey:
+          type: string
+        illustrationAsset:
+          type: string
+        ctaKey:
+          type: string
+          nullable: true
+        order:
+          type: integer
+          minimum: 0
+    ModeSelectionRequest:
+      type: object
+      required: [mode, locale, reducedMotion, onboardingVersion]
+      properties:
+        mode:
+          type: string
+          enum: [cold, hot]
+        locale:
+          type: string
+          enum: [en, zh]
+        reducedMotion:
+          type: boolean
+        onboardingVersion:
+          type: string
+          description: Version identifier to detect stale selections.
+    ModeSelectionResponse:
+      type: object
+      required: [mode, selectedAt]
+      properties:
+        mode:
+          type: string
+          enum: [cold, hot]
+        selectedAt:
+          type: string
+          format: date-time
+        needsColdIsolationAudit:
+          type: boolean
+          description: True when mode is cold and network services must remain disabled.
+    OnboardingCompletionRequest:
+      type: object
+      required: [sessionToken, locale, reducedMotion]
+      properties:
+        sessionToken:
+          type: string
+        locale:
+          type: string
+          enum: [en, zh]
+        reducedMotion:
+          type: boolean
+    OnboardingCompletionResponse:
+      type: object
+      required: [completedAt, firstRunFlagSet]
+      properties:
+        completedAt:
+          type: string
+          format: date-time
+        firstRunFlagSet:
+          type: boolean

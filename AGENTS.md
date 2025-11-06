@@ -31,3 +31,10 @@
 - Confirm `flutter analyze`, `flutter test`, and `cargo test` all pass before requesting review.
 - PR descriptions should link relevant issues, list tested platforms/devices, and attach UI screenshots when layouts change.
 - Call out migrations, schema updates, or new configuration steps explicitly so reviewers can verify them.
+
+## Active Technologies
+- Dart 3.9 (Flutter stable) + Rust 1.77+ (edition 2021) + `flutter`, `flutter_rust_bridge`, `rust_lib_transparent_wallet`, `flutter_secure_storage`, `shared_preferences` (for non-secret hints) (001-welcome-mode-choice)
+- Local secure storage (keystore/Keychain) for mode flag + in-memory caches; no remote persistence (001-welcome-mode-choice)
+
+## Recent Changes
+- 001-welcome-mode-choice: Added Dart 3.9 (Flutter stable) + Rust 1.77+ (edition 2021) + `flutter`, `flutter_rust_bridge`, `rust_lib_transparent_wallet`, `flutter_secure_storage`, `shared_preferences` (for non-secret hints)

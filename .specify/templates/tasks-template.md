@@ -8,9 +8,9 @@ description: "Task list template for feature implementation"
 **Input**: Design documents from `/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: `flutter analyze`, `flutter test`, and `cargo test --manifest-path rust/Cargo.toml` are constitutionally required for every story. Add extra suites (integration, golden, Rust unit) as the spec demands.
+**Tests**: `flutter analyze`, `flutter test`, and `cargo test --manifest-path rust/Cargo.toml` are constitutionally required for every story. Add extra suites (integration, golden, Rust unit) to cover hot↔cold QR flows as the spec demands.
 
-**Organization**: Tasks are grouped by user story so each increment is independently releasable across iOS, Android, and web.
+**Organization**: Tasks are grouped by user story so each increment is independently releasable across iOS, Android, web, and respects mode isolation.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -70,7 +70,9 @@ Examples of foundational tasks (tailor per plan):
 - [ ] T006 [P] Create shared widgets/utilities in `lib/src/common/` (used by all stories)
 - [ ] T007 Wire secure storage access helper in `lib/src/common/secure_storage.dart`
 - [ ] T008 Set up telemetry/logging scaffolding respecting privacy constraints
-- [ ] T009 Document parity commitments + exceptions in plan.md
+- [ ] T009 Document parity + localization commitments and mode assumptions in plan.md
+- [ ] T010 Cold-mode: enforce offline dependency injection stubs; Hot-mode: configure network clients behind mode checks
+- [ ] T011 Establish `rx-rust` streams for ViewModels with initial unit tests
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -86,18 +88,19 @@ Examples of foundational tasks (tailor per plan):
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US1] Flutter widget test in `test/[feature]/[widget]_test.dart`
-- [ ] T011 [P] [US1] Rust unit test in `rust/src/api/[feature].rs`
-- [ ] T012 [P] [US1] Integration test in `integration_test/[feature]_flow_test.dart`
+- [ ] T012 [P] [US1] Flutter widget test in `test/[feature]/[widget]_test.dart`
+- [ ] T013 [P] [US1] Rust unit test in `rust/src/api/[feature].rs`
+- [ ] T014 [P] [US1] Integration test in `integration_test/[feature]_flow_test.dart`
 
 ### Implementation for User Story 1
 
-- [ ] T013 [P] [US1] Implement Rust logic in `rust/src/api/[feature].rs`
-- [ ] T014 [US1] Regenerate bindings (`dart run flutter_rust_bridge:generate`)
-- [ ] T015 [US1] Implement Flutter view model in `lib/src/[feature]/state.dart`
-- [ ] T016 [US1] Build UI flow in `lib/src/[feature]/view.dart`
-- [ ] T017 [US1] Add parity validations + copy review across platforms
-- [ ] T018 [US1] Add structured logging + metrics hooks
+- [ ] T015 [P] [US1] Implement Rust logic in `rust/src/api/[feature].rs`
+- [ ] T016 [US1] Regenerate bindings (`dart run flutter_rust_bridge:generate`)
+- [ ] T017 [US1] Implement Rust ViewModel with `rx-rust` streams for hot/cold state
+- [ ] T018 [US1] Implement Flutter state bridge + subscriptions in `lib/src/[feature]/state.dart`
+- [ ] T019 [US1] Build UI flow in `lib/src/[feature]/view.dart`
+- [ ] T020 [US1] Add parity + localization validations across platforms
+- [ ] T021 [US1] Add structured logging + metrics hooks respecting mode isolation
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -111,16 +114,16 @@ Examples of foundational tasks (tailor per plan):
 
 ### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
 
-- [ ] T019 [P] [US2] Flutter widget test in `test/[feature]/[widget]_test.dart`
-- [ ] T020 [P] [US2] Rust unit test in `rust/src/api/[feature].rs`
-- [ ] T021 [P] [US2] Integration test in `integration_test/[feature]_flow_test.dart`
+- [ ] T022 [P] [US2] Flutter widget test in `test/[feature]/[widget]_test.dart`
+- [ ] T023 [P] [US2] Rust unit test in `rust/src/api/[feature].rs`
+- [ ] T024 [P] [US2] Integration test in `integration_test/[feature]_flow_test.dart`
 
 ### Implementation for User Story 2
 
-- [ ] T022 [P] [US2] Extend Rust APIs in `rust/src/api/[feature].rs`
-- [ ] T023 [US2] Update Flutter state + synchronizers in `lib/src/[feature]/state.dart`
-- [ ] T024 [US2] Update UI components in `lib/src/[feature]/view.dart`
-- [ ] T025 [US2] Document parity impacts + exceptions
+- [ ] T025 [P] [US2] Extend Rust APIs in `rust/src/api/[feature].rs`
+- [ ] T026 [US2] Update Flutter state + synchronizers in `lib/src/[feature]/state.dart`
+- [ ] T027 [US2] Update UI components in `lib/src/[feature]/view.dart`
+- [ ] T028 [US2] Document parity impacts + exceptions
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -134,16 +137,16 @@ Examples of foundational tasks (tailor per plan):
 
 ### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
 
-- [ ] T026 [P] [US3] Flutter widget test in `test/[feature]/[widget]_test.dart`
-- [ ] T027 [P] [US3] Rust unit test in `rust/src/api/[feature].rs`
-- [ ] T028 [P] [US3] Integration test in `integration_test/[feature]_flow_test.dart`
+- [ ] T029 [P] [US3] Flutter widget test in `test/[feature]/[widget]_test.dart`
+- [ ] T030 [P] [US3] Rust unit test in `rust/src/api/[feature].rs`
+- [ ] T031 [P] [US3] Integration test in `integration_test/[feature]_flow_test.dart`
 
 ### Implementation for User Story 3
 
-- [ ] T029 [P] [US3] Expand Rust logic in `rust/src/api/[feature].rs`
-- [ ] T030 [US3] Update Flutter view model in `lib/src/[feature]/state.dart`
-- [ ] T031 [US3] Update UI components in `lib/src/[feature]/view.dart`
-- [ ] T032 [US3] Validate telemetry + alerts for new flow
+- [ ] T032 [P] [US3] Expand Rust logic in `rust/src/api/[feature].rs`
+- [ ] T033 [US3] Update Flutter view model in `lib/src/[feature]/state.dart`
+- [ ] T034 [US3] Update UI components in `lib/src/[feature]/view.dart`
+- [ ] T035 [US3] Validate telemetry + alerts for new flow
 
 **Checkpoint**: All user stories should now be independently functional
 

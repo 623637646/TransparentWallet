@@ -20,7 +20,8 @@
   - Demonstrated to users independently
 
   For Transparent Wallet, every story MUST address ledger transparency, custody/privacy impact,
-  and cross-platform parity expectations called out in the constitution.
+  cold/hot wallet isolation, MVVM bridge discipline, and platform/localization parity expectations
+  called out in the constitution.
 -->
 
 ### User Story 1 - [Brief Title] (Priority: P1)
@@ -71,34 +72,37 @@
 ### Edge Cases
 
 <!--
-  ACTION REQUIRED: Capture ledger, custody, and parity risks here.
+  ACTION REQUIRED: Capture ledger, custody, mode isolation, MVVM, and parity risks here.
 -->
 
 - How does the flow behave if the ledger node is unreachable or returns stale data?
 - What is the user experience when secure storage access fails or is revoked?
-- How are parity gaps handled when a capability is missing on one platform?
-- What recovery path exists if an FFI call panics or returns an unexpected error?
+- What happens when cold mode is active and a dependency attempts network access?
+- How are parity or localization gaps handled when a capability or translation is missing?
+- What recovery path exists if an FFI call panics, a reactive stream breaks, or QR decoding fails?
 
 ## Requirements *(mandatory)*
 
 <!--
   ACTION REQUIRED: Replace each placeholder with concrete, testable requirements.
   Requirements MUST cite how they respect constitution principles (transparency,
-  custody, parity, FFI discipline, observability).
+  custody, cold/hot isolation, MVVM bridges, parity/localization, observability).
 -->
 
 ### Functional Requirements
 
 - **FR-001**: Wallet MUST surface ledger-sourced data for [feature] with documented provenance.
 - **FR-002**: Private keys and signing material MUST remain on-device; no remote transmission.
-- **FR-003**: iOS, Android, and web MUST expose equivalent UI and error handling for this flow.
-- **FR-004**: Rust FFI MUST provide `[function_name]` returning `[DTO]`; bindings regenerated via `flutter_rust_bridge`.
-- **FR-005**: Metrics/logging MUST record [event] without leaking PII and ship to approved sinks.
+- **FR-003**: Cold mode MUST stay air-gapped; any QR import/export MUST follow the approved schema.
+- **FR-004**: iOS, Android, and web MUST expose equivalent UI, localization (EN/zh), and error handling for this flow.
+- **FR-005**: Rust ViewModel MUST surface `[stream_name]` via `rx-rust`; Flutter subscribes without duplicating logic.
+- **FR-006**: Rust FFI MUST provide `[function_name]` returning `[DTO]`; bindings regenerated via `flutter_rust_bridge`.
+- **FR-007**: Metrics/logging MUST record [event] without leaking PII and ship to approved sinks.
 
 *Example of marking unclear requirements:*
 
-- **FR-006**: Ledger update frequency MUST be [NEEDS CLARIFICATION: e.g., "every 30s"] to satisfy transparency.
-- **FR-007**: Android secure storage fallback MUST be [NEEDS CLARIFICATION: e.g., "StrongBox"] or parity exception filed.
+- **FR-008**: Ledger update frequency MUST be [NEEDS CLARIFICATION: e.g., "every 30s"] to satisfy transparency.
+- **FR-009**: Android secure storage fallback MUST be [NEEDS CLARIFICATION: e.g., "StrongBox"] or parity exception filed.
 
 ### Key Entities *(include if feature involves data)*
 

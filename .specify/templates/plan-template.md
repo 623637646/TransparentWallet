@@ -16,9 +16,9 @@
 **Storage**: Local secure storage (keystore/Keychain); no remote persistence  
 **Testing**: `flutter analyze`, `flutter test`, `cargo test --manifest-path rust/Cargo.toml`  
 **Target Platform**: iOS, Android, and Flutter web (parity required)  
-**Project Type**: Flutter client with embedded Rust FFI crate  
+**Project Type**: Flutter client with embedded Rust FFI crate (cold + hot modes)  
 **Performance Goals**: 60 fps UI; ledger sync <2s per account on reference devices  
-**Constraints**: Canonical ledger data, no PII telemetry, semver-stable FFI contracts  
+**Constraints**: Canonical ledger data, cold-mode offline guarantees, no PII telemetry, semver-stable MVVM bridges  
 **Scale/Scope**: Multi-account consumer wallet; incremental, independently releasable flows
 
 ## Constitution Check
@@ -29,12 +29,14 @@
   deterministic replay fixtures?
 - Custody & privacy: Where do secrets live and how are logging/telemetry
   sanitized?
-- Platform parity: What is the rollout plan across iOS, Android, and web? Any
-  exception MUST include closure criteria.
-- FFI discipline: Which Rust APIs change? How will bindings regenerate and how
-  are boundary tests updated?
+- Cold & hot wallet isolation: How is the mode enforced, and how do QR payloads
+  stay air-gapped and verifiable?
+- Platform & localization parity: What is the rollout plan across iOS, Android,
+  web, and supported languages? Any exception MUST include closure criteria.
+- MVVM bridge discipline: Which Rust ViewModels or DTOs change, how will
+  `rx-rust` streams evolve, and how are bindings regenerated with tests?
 - Test & observability: Which automated suites, metrics, and dashboards prove
-  the release safe before cut?
+  the release safe before cut across both modes?
 
 ## Project Structure
 

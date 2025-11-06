@@ -1,60 +1,68 @@
-# Transparent Wallet
+# Transparent Wallet — A Secure Dual-Mode Cryptocurrency Wallet
 
-Transparent Wallet delivers a cross-platform Flutter experience backed by a Rust
-FFI layer so users can inspect and manage on-chain balances with full
-provenance.
+**Transparent Wallet** is a cryptocurrency wallet application designed with a **dual-mode architecture**:  
+**Cold Wallet Mode** and **Hot Wallet Mode**.  
+At any given time, one instance of the program can only operate in one mode.
 
-## Transparent Wallet — Split Cold/Hot Security Wallet
+---
 
-**Transparent Wallet** can run in either **cold wallet** or **hot wallet** mode. A single app instance stays in one mode at a time so responsibilities remain clearly separated.
+## 🧊 Cold Wallet Mode
 
-### 🧊 Cold Wallet Mode
+The **Cold Wallet** focuses on **secure key management and transaction signing**.  
+It is responsible for protecting sensitive information such as **mnemonic phrases, seed phrases, and private keys**.  
+To ensure maximum security, the cold wallet operates **completely offline**:
 
-- Keeps mnemonics, private keys, and other secrets in the safest possible environment
-- Operates completely offline with Wi-Fi, Bluetooth, and other radios disabled
-- Produces deposit addresses or extended public keys (xpub) for the hot wallet and renders them as QR codes
+- No internet connection  
+- Wi-Fi, Bluetooth, and all external communication interfaces are disabled  
+- The device is used exclusively for cryptographic operations  
 
-### 🔥 Hot Wallet Mode
+In this mode, the cold wallet performs the following key functions:
 
-- Connects to the internet to sync balances, fetch history, and build transactions
-- Creates, signs, and broadcasts transactions by talking to blockchain nodes or third-party APIs
+- **Generate new wallet addresses** and **extended public keys (xpub)** for asset management  
+- **Sign transactions offline** using stored private keys  
+- **Display QR codes** containing public information (e.g., addresses, signed transactions) for the hot wallet to scan  
 
-### 🔄 Cold/Hot Handoff Flow
+This ensures that private keys **never leave the cold wallet device** under any circumstances.
 
-1. The cold wallet derives addresses or an xpub and displays a QR code
-2. The hot wallet scans the QR code to load account metadata for balance tracking or transaction construction
-3. The hot wallet builds an unsigned transaction and shows it as a QR code
-4. The cold wallet scans, signs offline, and outputs the signed payload as another QR code
-5. The hot wallet scans the signature, reconnects to the network, and broadcasts the transaction
+---
 
-This air-gapped exchange keeps every step observable, auditable, and safe—hence the name **Transparent Wallet**.
+## 🔥 Hot Wallet Mode
 
-## Project Overview
+The **Hot Wallet** is responsible for **networked operations** and **user interaction with the blockchain**.  
+It connects to the internet to retrieve blockchain data and interact with decentralized services.  
+Its primary responsibilities include:
 
-- Flutter UI lives under `lib/src/`, with feature modules in `lib/src/<feature>`
-  and shared components in `lib/src/common`.
-- Rust FFI exports reside in `rust/src/api`; regenerate bindings with
-  `dart run flutter_rust_bridge:generate` whenever APIs change.
-- Packaged Rust binaries are produced by the `rust_builder/` tooling for mobile
-  targets.
+- **Fetching real-time asset balances** and transaction history  
+- **Constructing unsigned transactions** based on user actions  
+- **Displaying unsigned transactions as QR codes** for the cold wallet to scan  
+- **Scanning signed transactions** from the cold wallet and **broadcasting them to the blockchain**  
 
-## Development Quickstart
+In this mode, private keys are **never exposed** — all signing occurs exclusively in the cold wallet.
 
-```bash
-flutter pub get
-flutter analyze
-flutter test
-cargo test --manifest-path rust/Cargo.toml
-```
+---
 
-- Run features on devices or emulators with `flutter run --dart-define=...`.
-- Keep Flutter code formatted via `dart format .`; format Rust via `cargo fmt --all`.
-- Integration journeys belong in `integration_test/`; Rust unit tests sit next
-  to their implementations.
+## 🔄 Cold & Hot Wallet Interaction
 
-## Governance
+Users can run two instances of Transparent Wallet simultaneously — one in **Cold Mode** and one in **Hot Mode**.  
+The two wallets **communicate entirely via QR codes**, creating a **fully air-gapped and verifiable workflow**.
 
-All work MUST comply with the project constitution in
-`.specify/memory/constitution.md`. Plans, specs, and task lists are expected to
-document ledger transparency, custody, parity, FFI, and observability
-considerations before implementation begins.
+The process flow is as follows:
+
+1. **Address Exchange**  
+   - The cold wallet generates wallet addresses or an extended public key (xpub)  
+   - It displays this information as a QR code  
+   - The hot wallet scans the QR code to import the address or xpub, enabling it to view balances and transaction history  
+
+2. **Transaction Creation**  
+   - The hot wallet prepares an unsigned transaction and displays it as a QR code  
+   - The cold wallet scans this code, verifies the transaction details, and signs it securely offline  
+
+3. **Transaction Broadcast**  
+   - The cold wallet displays the signed transaction as a new QR code  
+   - The hot wallet scans this code and broadcasts the transaction to the blockchain network  
+
+---
+
+This **QR-based offline communication** model ensures that all cryptographic operations are **transparent, secure, and auditable**.  
+It combines the **convenience of a hot wallet** with the **security of a cold wallet**,  
+which is the inspiration behind the name **Transparent Wallet**.

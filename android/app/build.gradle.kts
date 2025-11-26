@@ -31,6 +31,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            packaging {
+                jniLibs {
+                    // Keep the debug symbols so that the stack trace is readable.
+                    keepDebugSymbols += setOf("**/librust_lib_transparent_wallet.so")
+                }
+            }
+        }
+
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.

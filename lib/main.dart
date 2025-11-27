@@ -1,26 +1,22 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:transparent_wallet/src/rust/api/simple.dart';
+import 'package:transparent_wallet/src/rust/api/app.dart';
 import 'package:transparent_wallet/src/rust/frb_generated.dart';
+import 'package:transparent_wallet/src/utils/logger.dart';
+import 'package:transparent_wallet/src/widgets/my_app.dart';
+import 'package:sqflite/sqflite.dart';
 
 Future<void> main() async {
+  // Init flutter_rust_bridge
   await RustLib.init();
-  runApp(const MyApp());
-}
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  // Init logger
+  initLogger();
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('flutter_rust_bridge quickstart')),
-        body: Center(
-          child: Text(
-            'Action: Call Rust `greet("Tom")`\nResult: `${greet(name: "Tom")}`',
-          ),
-        ),
-      ),
-    );
-  }
+  // Init context
+  WidgetsFlutterBinding.ensureInitialized();
+  final workingDir = await getDatabasesPath();
+  final context = await initContext(workingDir: workingDir);
+
+  runApp(MyApp(appContext: context));
 }

@@ -11,6 +11,7 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+.codex/
 
 # IntelliJ related
 *.iml
@@ -43,3 +44,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+target
+lib/src/rust
+rust/src/frb_generated.rs

@@ -1,5 +1,5 @@
 use crate::{
-    api_utils::never::Never,
+    error::WalletError,
     managers::app_settings::{self, repository::AppSettingsRepository},
 };
 use futures::FutureExt;
@@ -7,16 +7,17 @@ use rx_rust::{
     disposable::subscription::Subscription, observable::observable_ext::ObservableExt,
     subject::behavior_subject::BehaviorSubject,
 };
+use std::convert::Infallible;
 
-pub(crate) struct AppSettingsManager {
-    pub(crate) subject: BehaviorSubject<'static, app_settings::Model, Never>,
+pub struct AppSettingsManager {
+    pub subject: BehaviorSubject<'static, app_settings::Model, Infallible>,
     _subscription: Subscription<'static>,
 }
 
 impl AppSettingsManager {
     pub(crate) async fn new(
         repository: impl AppSettingsRepository + Send + Sync + 'static,
-    ) -> Result<Self, anyhow::Error> {
+    ) -> Result<Self, WalletError> {
         let app_settings = repository.get_app_settings().await?;
         let subject = BehaviorSubject::new(app_settings);
         let sub = subject.clone().skip(1).subscribe_with_callback(

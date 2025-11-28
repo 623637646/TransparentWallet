@@ -1,3 +1,4 @@
+use crate::error::WalletError;
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use std::path::Path;
 
@@ -5,7 +6,7 @@ use std::path::Path;
 pub(crate) struct DBManager(DatabaseConnection);
 
 impl DBManager {
-    pub(crate) async fn new(working_path: &Path) -> Result<Self, anyhow::Error> {
+    pub(crate) async fn new(working_path: &Path) -> Result<Self, WalletError> {
         let db_url = format!(
             "sqlite://{}?mode=rwc",
             working_path.join("wallet.db").to_str().unwrap()

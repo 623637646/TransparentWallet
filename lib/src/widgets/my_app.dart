@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:transparent_wallet/src/rust/api/app.dart';
-import 'package:transparent_wallet/src/rust/api_utils/never.dart' as rust;
-import 'package:transparent_wallet/src/rust/managers/app_settings/entities.dart';
+import 'package:transparent_wallet/src/rust/api/app_settings.dart';
+import 'package:transparent_wallet/src/rust/api/context.dart';
+import 'package:transparent_wallet/src/rust/utils/never.dart';
 import 'package:transparent_wallet/src/utils/bridge_helper.dart';
 
 class MyApp extends StatelessWidget {
@@ -34,7 +34,7 @@ class _WalletModeRouterState extends State<_WalletModeRouter> {
   @override
   void initState() {
     super.initState();
-    _appModeStream = convertSubscriptionToStream<AppMode, rust.Never>(
+    _appModeStream = convertSubscriptionToStream<AppMode, BridgeNever>(
       (callback) => widget.appContext.appModeStream(callback: callback),
     );
   }

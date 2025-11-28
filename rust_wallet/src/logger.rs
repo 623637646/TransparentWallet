@@ -2,13 +2,13 @@ use log::LevelFilter;
 use log::{Level, Metadata, Record};
 use rx_rust::disposable::subscription::Subscription;
 use rx_rust::observable::Observable;
-use rx_rust::observer::boxed_observer::BoxedObserver;
 use rx_rust::observer::Observer;
+use rx_rust::observer::boxed_observer::BoxedObserver;
 use rx_rust::operators::creating::create::Create;
 use std::convert::Infallible;
 use std::sync::{Arc, Mutex, OnceLock};
 
-pub(crate) fn init_logger_observable() -> impl Observable<'static, 'static, LogEntry, Infallible> {
+pub fn init_logger_observable() -> impl Observable<'static, 'static, LogEntry, Infallible> {
     Create::new(|observer| {
         let logger = APP_LOGGER.get_or_init(|| {
             let logger = AppLogger(Arc::new(Mutex::new(None)));

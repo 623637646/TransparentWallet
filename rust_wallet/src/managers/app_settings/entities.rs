@@ -6,8 +6,8 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key)]
     id: i32,
-    pub(crate) app_mode: AppMode,
-    pub(crate) language: Language,
+    pub app_mode: AppMode,
+    pub language: Language,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

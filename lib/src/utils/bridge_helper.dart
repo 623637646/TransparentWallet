@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:transparent_wallet/src/rust/api_utils/bridge_helper.dart';
+import 'package:transparent_wallet/src/rust/utils/bridge_helper.dart';
 
 Stream<T> convertSubscriptionToStream<T, E extends Object>(
   Future<BridgeSubscription> Function(FutureOr<void> Function(T?, E?))

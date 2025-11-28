@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:transparent_wallet/src/rust/api/app.dart';
+import 'package:transparent_wallet/src/rust/api/context.dart';
 import 'package:transparent_wallet/src/rust/frb_generated.dart';
 import 'package:transparent_wallet/src/utils/logger.dart';
 import 'package:transparent_wallet/src/widgets/my_app.dart';
@@ -10,8 +10,8 @@ Future<void> main() async {
   // Init flutter_rust_bridge
   await RustLib.init();
 
-  // Init logger
-  initLogger();
+  // Init rust logger
+  initRustLogger();
 
   // Init context
   WidgetsFlutterBinding.ensureInitialized();

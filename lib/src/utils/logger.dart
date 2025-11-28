@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:logger/logger.dart';
-import 'package:transparent_wallet/src/rust/api/logger.dart' as api_logger;
-import 'package:transparent_wallet/src/rust/api_utils/never.dart';
-import 'package:transparent_wallet/src/rust/utils/logger.dart';
+import 'package:transparent_wallet/src/rust/api/logger.dart';
+import 'package:transparent_wallet/src/rust/utils/never.dart';
 import 'package:transparent_wallet/src/utils/bridge_helper.dart';
 
 final Logger logger = Logger(
@@ -21,11 +20,11 @@ final Logger logger = Logger(
 
 StreamSubscription<LogEntry>? _loggerSubscription;
 
-void initLogger() {
+void initRustLogger() {
   assert(_loggerSubscription == null);
 
-  final stream = convertSubscriptionToStream<LogEntry, Never>(
-    (callback) => api_logger.initLogger(callback: callback),
+  final stream = convertSubscriptionToStream<LogEntry, BridgeNever>(
+    (callback) => initLogger(callback: callback),
   );
 
   _loggerSubscription = stream.listen(

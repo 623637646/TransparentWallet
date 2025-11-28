@@ -1,25 +1,28 @@
-use crate::managers::{app_settings, db::DBManager};
+use crate::{
+    error::WalletError,
+    managers::{app_settings, db::DBManager},
+};
 use sea_orm::{ActiveModelTrait, ActiveValue::Set, EntityTrait, IntoActiveModel};
 
 pub(crate) trait AppSettingsRepository {
     fn get_app_settings(
         &self,
-    ) -> impl std::future::Future<Output = Result<app_settings::Model, anyhow::Error>>
-           + std::marker::Send
-           + 'static;
+    ) -> impl std::future::Future<Output = Result<app_settings::Model, WalletError>>
+    + std::marker::Send
+    + 'static;
 
     fn set_app_settings(
         &self,
         app_settings: app_settings::Model,
-    ) -> impl std::future::Future<Output = Result<(), anyhow::Error>> + std::marker::Send + 'static;
+    ) -> impl std::future::Future<Output = Result<(), WalletError>> + std::marker::Send + 'static;
 }
 
 impl AppSettingsRepository for DBManager {
     fn get_app_settings(
         &self,
-    ) -> impl std::future::Future<Output = Result<app_settings::Model, anyhow::Error>>
-           + std::marker::Send
-           + 'static {
+    ) -> impl std::future::Future<Output = Result<app_settings::Model, WalletError>>
+    + std::marker::Send
+    + 'static {
         let this = self.clone();
         async move {
             let connection = this.get_connection();
@@ -41,7 +44,7 @@ impl AppSettingsRepository for DBManager {
     fn set_app_settings(
         &self,
         app_settings: app_settings::Model,
-    ) -> impl std::future::Future<Output = Result<(), anyhow::Error>> + std::marker::Send + 'static
+    ) -> impl std::future::Future<Output = Result<(), WalletError>> + std::marker::Send + 'static
     {
         let this = self.clone();
         async move {

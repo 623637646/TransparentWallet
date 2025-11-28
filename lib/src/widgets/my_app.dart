@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:transparent_wallet/src/rust/api/app_settings.dart';
+import 'package:transparent_wallet/src/rust/api/app_mode.dart';
 import 'package:transparent_wallet/src/rust/api/context.dart';
 import 'package:transparent_wallet/src/rust/utils/never.dart';
 import 'package:transparent_wallet/src/utils/bridge_helper.dart';
+import 'package:transparent_wallet/src/widgets/cold_wallet_demo_page.dart';
+import 'package:transparent_wallet/src/widgets/hot_wallet_demo_page.dart';
+import 'package:transparent_wallet/src/widgets/intro_page.dart';
+import 'common/localized_text.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key, required this.appContext});
@@ -12,23 +16,41 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Transparent Wallet',
-      home: _WalletModeRouter(appContext: appContext),
+    return StreamBuilder<String>(
+      stream: convertSubscriptionToStream<String, String>(
+        (onNext, onTermination) => appContext.lookupLocal(
+          textId: 'app-name',
+          onNext: onNext,
+          onTermination: onTermination,
+        ),
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return _FullScreenMessage(
+            titleKey: 'loading-failed',
+            content: Text('${snapshot.error}'),
+            appContext: appContext,
+          );
+        }
+        return MaterialApp(
+          title: snapshot.data,
+          home: WalletModeRouter(appContext: appContext),
+        );
+      },
     );
   }
 }
 
-class _WalletModeRouter extends StatefulWidget {
-  const _WalletModeRouter({required this.appContext});
+class WalletModeRouter extends StatefulWidget {
+  const WalletModeRouter({super.key, required this.appContext});
 
   final Context appContext;
 
   @override
-  State<_WalletModeRouter> createState() => _WalletModeRouterState();
+  State<WalletModeRouter> createState() => _WalletModeRouterState();
 }
 
-class _WalletModeRouterState extends State<_WalletModeRouter> {
+class _WalletModeRouterState extends State<WalletModeRouter> {
   late final Stream<AppMode> _appModeStream;
 
   @override
@@ -42,17 +64,6 @@ class _WalletModeRouterState extends State<_WalletModeRouter> {
     );
   }
 
-  Future<void> _setAppMode(AppMode mode) async {
-    try {
-      await widget.appContext.setAppMode(appMode: mode);
-    } catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('切换钱包模式失败：$error')));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<AppMode>(
@@ -60,135 +71,71 @@ class _WalletModeRouterState extends State<_WalletModeRouter> {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return _FullScreenMessage(
-            title: '加载失败',
-            message: '${snapshot.error}',
+            titleKey: 'loading-failed',
+            content: Text('${snapshot.error}'),
+            appContext: widget.appContext,
           );
         }
 
         final mode = snapshot.data;
         if (mode == null) {
-          return const _FullScreenMessage(
-            title: '加载中',
-            message: '正在获取钱包状态…',
+          return _FullScreenMessage(
+            titleKey: 'loading',
+            content: LocalizedText(
+              'loading-wallet-status',
+              appContext: widget.appContext,
+              textAlign: TextAlign.center,
+            ),
             showSpinner: true,
+            appContext: widget.appContext,
           );
         }
 
         switch (mode) {
           case AppMode.init:
-            return WalletSetupPage(onSelectMode: _setAppMode);
+            return IntroPage(appContext: widget.appContext);
           case AppMode.coldWallet:
+            return ColdWalletDemoPage(appContext: widget.appContext);
           case AppMode.hotWallet:
-            return WalletDemoPage(
-              mode: mode,
-              onReset: () => _setAppMode(AppMode.init),
-            );
+            return HotWalletDemoPage(appContext: widget.appContext);
         }
       },
     );
   }
 }
 
-class WalletSetupPage extends StatelessWidget {
-  const WalletSetupPage({super.key, required this.onSelectMode});
-
-  final Future<void> Function(AppMode) onSelectMode;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(title: const Text('选择钱包模式')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('当前状态：未设置', style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 12),
-            Text(
-              '请选择冷钱包或热钱包，应用会保存选择并跳转到对应的演示页面。',
-              style: theme.textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () => onSelectMode(AppMode.coldWallet),
-              child: const Text('冷钱包'),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () => onSelectMode(AppMode.hotWallet),
-              child: const Text('热钱包'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class WalletDemoPage extends StatelessWidget {
-  const WalletDemoPage({super.key, required this.mode, required this.onReset})
-    : assert(mode != AppMode.init);
-
-  final AppMode mode;
-  final Future<void> Function() onReset;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isCold = mode == AppMode.coldWallet;
-    final title = isCold ? '冷钱包' : '热钱包';
-    final description = isCold
-        ? '设备离线存储并签名交易，适合高安全场景的演示。'
-        : '设备保持在线，便于快速交易与管理资产的演示。';
-
-    return Scaffold(
-      appBar: AppBar(title: Text('$title Demo')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('当前状态：$title', style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 12),
-            Text(description, style: theme.textTheme.bodyMedium),
-            const Spacer(),
-            ElevatedButton(onPressed: onReset, child: const Text('重置钱包')),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _FullScreenMessage extends StatelessWidget {
   const _FullScreenMessage({
-    required this.title,
-    required this.message,
+    required this.titleKey,
+    required this.content,
+    required this.appContext,
     this.showSpinner = false,
   });
 
-  final String title;
-  final String message;
+  final String titleKey;
+  final Widget content;
+  final Context appContext;
   final bool showSpinner;
 
   @override
   Widget build(BuildContext context) {
     final children = <Widget>[
-      Text(title, style: Theme.of(context).textTheme.headlineSmall),
+      LocalizedText(
+        titleKey,
+        style: Theme.of(context).textTheme.headlineSmall,
+        appContext: appContext,
+      ),
       const SizedBox(height: 12),
       if (showSpinner)
         const Padding(
           padding: EdgeInsets.only(bottom: 12),
           child: CircularProgressIndicator(),
         ),
-      Text(message, textAlign: TextAlign.center),
+      content,
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Transparent Wallet')),
+      appBar: AppBar(title: LocalizedText('app-name', appContext: appContext)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),

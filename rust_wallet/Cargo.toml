@@ -6,8 +6,12 @@ edition = "2024"
 [dependencies]
 log = { version = "0.4.28", features = ["std"] }
 thiserror = "2.0.17"
+strum = "0.27"
+strum_macros = "0.27"
 futures = "0.3.31"
 tokio = { version = "1.48.0", features = ["full"] }
-rx-rust = { version = "0.2.1", features = ["tokio-scheduler"] }
-sea-orm = { version = "2.0.0-rc.19", features = [ "sqlx-sqlite", "runtime-tokio-rustls", "macros", "schema-sync", "entity-registry", "debug-print" ] }
-
+rx-rust = { version = "0.3.0", features = ["tokio-scheduler"] }
+sea-orm = { version = "2.0.0-rc.19", features = [ "sqlx-sqlite", "runtime-tokio-rustls", "macros", "schema-sync", "entity-registry" ] }
+fluent-templates = "0.13.2"
+fluent-bundle = "0.16.0"
+fluent-langneg = "0.14.2"

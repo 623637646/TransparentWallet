@@ -1,2 +1,3 @@
-pub mod app_settings;
+pub mod app_mode;
 pub(crate) mod db;
+pub mod localization;

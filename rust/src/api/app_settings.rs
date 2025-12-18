@@ -22,7 +22,8 @@ pub enum _Language {
 impl Context {
     pub async fn app_mode_stream(
         &self,
-        callback: impl Fn(Option<AppMode>, Option<BridgeNever>) -> DartFnFuture<()> + Send + 'static,
+        on_next: impl Fn(AppMode) -> DartFnFuture<()> + Send + Sync + 'static,
+        on_termination: impl Fn(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
             |_| {
@@ -33,7 +34,8 @@ impl Context {
                     .map(|e| e.app_mode)
                     .map_infallible_to_error()
             },
-            callback,
+            on_next,
+            on_termination,
         )
     }
 
@@ -45,7 +47,8 @@ impl Context {
 
     pub async fn language_stream(
         &self,
-        callback: impl Fn(Option<Language>, Option<BridgeNever>) -> DartFnFuture<()> + Send + 'static,
+        on_next: impl Fn(Language) -> DartFnFuture<()> + Send + Sync + 'static,
+        on_termination: impl Fn(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
             |_| {
@@ -56,7 +59,8 @@ impl Context {
                     .map(|e| e.language)
                     .map_infallible_to_error()
             },
-            callback,
+            on_next,
+            on_termination,
         )
     }
 

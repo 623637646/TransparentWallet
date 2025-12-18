@@ -24,10 +24,12 @@ pub enum _LogLevel {
 }
 
 pub async fn init_logger(
-    callback: impl Fn(Option<LogEntry>, Option<BridgeNever>) -> DartFnFuture<()> + Send + 'static,
+    on_next: impl Fn(LogEntry) -> DartFnFuture<()> + Send + Sync + 'static,
+    on_termination: impl Fn(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
 ) -> BridgeSubscription {
     subscribe_with_bridge_callback(
         |_| init_logger_observable().map_infallible_to_error(),
-        callback,
+        on_next,
+        on_termination,
     )
 }

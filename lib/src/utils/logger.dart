@@ -24,7 +24,8 @@ void initRustLogger() {
   assert(_loggerSubscription == null);
 
   final stream = convertSubscriptionToStream<LogEntry, BridgeNever>(
-    (callback) => initLogger(callback: callback),
+    (onNext, onTermination) =>
+        initLogger(onNext: onNext, onTermination: onTermination),
   );
 
   _loggerSubscription = stream.listen(

@@ -2,30 +2,32 @@ import 'dart:async';
 import 'package:transparent_wallet/src/rust/utils/bridge_helper.dart';
 
 Stream<T> convertSubscriptionToStream<T, E extends Object>(
-  Future<BridgeSubscription> Function(FutureOr<void> Function(T?, E?))
+  Future<BridgeSubscription> Function(
+    FutureOr<void> Function(T) onNext,
+    FutureOr<void> Function(E?) onTermination,
+  )
   subscriptionBuilder,
 ) {
   final controller = StreamController<T>();
 
-  Null callback(value, error) {
+  Null onNext(value) {
     if (controller.isClosed) return;
-    switch ((value, error)) {
-      case (T value, null):
-        controller.add(value);
-        break;
-      case (null, E error):
+    controller.add(value);
+  }
+
+  Null onTermination(error) {
+    if (controller.isClosed) return;
+    switch (error) {
+      case (E error):
         controller.addError(error);
         break;
-      case (null, null):
+      case (null):
         controller.close();
-        break;
-      default:
-        assert(false);
         break;
     }
   }
 
-  final sub = subscriptionBuilder(callback);
+  final sub = subscriptionBuilder(onNext, onTermination);
   controller.onCancel = () async => (await sub).dispose();
   return controller.stream;
 }

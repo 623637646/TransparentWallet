@@ -35,7 +35,10 @@ class _WalletModeRouterState extends State<_WalletModeRouter> {
   void initState() {
     super.initState();
     _appModeStream = convertSubscriptionToStream<AppMode, BridgeNever>(
-      (callback) => widget.appContext.appModeStream(callback: callback),
+      (onNext, onTermination) => widget.appContext.appModeStream(
+        onNext: onNext,
+        onTermination: onTermination,
+      ),
     );
   }
 

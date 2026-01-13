@@ -7,7 +7,7 @@ use strum_macros::Display;
 pub struct Model {
     #[sea_orm(primary_key)]
     id: i32,
-    pub(crate) language: Option<Language>, // TODO: does this work?
+    pub(crate) language: Option<Language>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

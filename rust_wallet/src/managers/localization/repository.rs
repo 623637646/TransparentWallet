@@ -49,7 +49,7 @@ impl LocalizationRepository for DBManager {
         async move {
             let connection = this.get_connection();
             let active_model = localization.into_active_model();
-            let active_model = active_model.reset_all(); // TODO: need this?
+            let active_model = active_model.reset_all();
             active_model.update(&connection).await?;
             Ok(())
         }

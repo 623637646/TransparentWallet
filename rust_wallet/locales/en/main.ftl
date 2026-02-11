@@ -21,8 +21,8 @@ hot-wallet-desc-2 = Device stays online, convenient transactions
 reset-wallet-failed = Reset Failed: {$error}
 reset-wallet-btn = Reset Wallet (Back to Intro)
 
-lang-title = Choose Language
-lang-desc = Select your preferred language
+settings-title = Settings
+settings-language = Language
 lang-en = English
 lang-zh = 简体中文
 lang-system = Follow System

@@ -34,6 +34,87 @@ class MyApp extends StatelessWidget {
         }
         return MaterialApp(
           title: snapshot.data,
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.blueGrey,
+              surface: const Color(0xFFF7F9FC),
+              surfaceContainerLow: Colors.white,
+            ),
+            scaffoldBackgroundColor: const Color(0xFFF7F9FC),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFFF7F9FC),
+              elevation: 0,
+              centerTitle: true,
+              titleTextStyle: TextStyle(
+                color: Color(0xFF2D3436),
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              iconTheme: IconThemeData(color: Color(0xFF2D3436)),
+            ),
+            /*
+            cardTheme: CardTheme(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+              ),
+              color: Colors.white,
+              margin: EdgeInsets.zero,
+            ),
+            */
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            textTheme: const TextTheme(
+              headlineLarge: TextStyle(
+                color: Color(0xFF2D3436),
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
+              ),
+              headlineMedium: TextStyle(
+                color: Color(0xFF2D3436),
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
+              ),
+              titleLarge: TextStyle(
+                color: Color(0xFF2D3436),
+                fontWeight: FontWeight.w600,
+              ),
+              bodyLarge: TextStyle(color: Color(0xFF636E72), height: 1.5),
+              bodyMedium: TextStyle(color: Color(0xFF636E72)),
+            ),
+            dividerTheme: DividerThemeData(
+              color: Colors.grey.withValues(alpha: 0.1),
+              thickness: 1,
+              space: 1,
+            ),
+          ),
           home: WalletModeRouter(appContext: appContext),
         );
       },

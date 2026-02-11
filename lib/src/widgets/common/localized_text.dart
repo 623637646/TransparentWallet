@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../rust/api/context.dart';
-import '../../rust/utils/bridge_helper.dart';
+import '../../utils/bridge_helper.dart';
 
 class LocalizedText extends StatefulWidget {
   final String textId;
@@ -24,75 +24,64 @@ class LocalizedText extends StatefulWidget {
 }
 
 class _LocalizedTextState extends State<LocalizedText> {
-  String _text = '';
-  BridgeSubscription? _subscription;
-  bool _initialized = false;
+  late Stream<String> _stream;
 
   @override
   void initState() {
     super.initState();
-    _subscribe();
+    _initStream();
+  }
+
+  void _initStream() {
+    _stream = convertSubscriptionToStream<String, String>((
+      onNext,
+      onTermination,
+    ) {
+      if (widget.args != null) {
+        return widget.appContext.lookupLocalWithArgs(
+          textId: widget.textId,
+          args: widget.args!,
+          onNext: onNext,
+          onTermination: onTermination,
+        );
+      } else {
+        return widget.appContext.lookupLocal(
+          textId: widget.textId,
+          onNext: onNext,
+          onTermination: onTermination,
+        );
+      }
+    });
   }
 
   @override
   void didUpdateWidget(LocalizedText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.textId != widget.textId || oldWidget.args != widget.args) {
-      _resubscribe();
+    if (oldWidget.textId != widget.textId ||
+        !_mapEquals(oldWidget.args, widget.args)) {
+      setState(() {
+        _initStream();
+      });
     }
   }
 
-  @override
-  void dispose() {
-    _unsubscribe();
-    super.dispose();
-  }
-
-  Future<void> _subscribe() async {
-    void onNext(String value) {
-      if (mounted) {
-        setState(() {
-          _text = value;
-          _initialized = true;
-        });
-      }
+  bool _mapEquals(Map? a, Map? b) {
+    if (a == null) return b == null;
+    if (b == null || a.length != b.length) return false;
+    for (final key in a.keys) {
+      if (b[key] != a[key]) return false;
     }
-
-    void onTermination(String? value) {
-      // Stream terminated
-    }
-
-    if (widget.args != null) {
-      _subscription = await widget.appContext.lookupLocalWithArgs(
-        textId: widget.textId,
-        args: widget.args!,
-        onNext: onNext,
-        onTermination: onTermination,
-      );
-    } else {
-      _subscription = await widget.appContext.lookupLocal(
-        textId: widget.textId,
-        onNext: onNext,
-        onTermination: onTermination,
-      );
-    }
-  }
-
-  void _unsubscribe() {
-    _subscription?.dispose();
-    _subscription = null;
-  }
-
-  Future<void> _resubscribe() async {
-    _unsubscribe();
-    await _subscribe();
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_initialized) {
-      return Text('', style: widget.style);
-    }
-    return Text(_text, style: widget.style, textAlign: widget.textAlign);
+    return StreamBuilder<String>(
+      stream: _stream,
+      builder: (context, snapshot) {
+        final text = snapshot.data ?? '';
+        return Text(text, style: widget.style, textAlign: widget.textAlign);
+      },
+    );
   }
 }

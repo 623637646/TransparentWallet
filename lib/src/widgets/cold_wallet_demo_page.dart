@@ -20,6 +20,7 @@ class ColdWalletDemoPage extends StatelessWidget {
             args: {'error': e.toString()},
             appContext: appContext,
           ),
+          backgroundColor: Colors.redAccent,
         ),
       );
     }
@@ -28,33 +29,69 @@ class ColdWalletDemoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: LocalizedText('cold-wallet-title', appContext: appContext),
-        backgroundColor: Colors.blueGrey,
+        centerTitle: true,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.ac_unit, size: 100, color: Colors.blueGrey),
-            const SizedBox(height: 20),
-            LocalizedText(
-              'cold-wallet-desc-1',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              appContext: appContext,
-            ),
-            const SizedBox(height: 10),
-            LocalizedText('cold-wallet-desc-2', appContext: appContext),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: () => _resetWallet(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                foregroundColor: Colors.white,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(48),
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.ac_unit,
+                  size: 80,
+                  color: Colors.blueGrey,
+                ),
               ),
-              child: LocalizedText('reset-wallet-btn', appContext: appContext),
-            ),
-          ],
+              const SizedBox(height: 48),
+              LocalizedText(
+                'cold-wallet-desc-1',
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+                appContext: appContext,
+              ),
+              const SizedBox(height: 16),
+              LocalizedText(
+                'cold-wallet-desc-2',
+                style: Theme.of(context).textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+                appContext: appContext,
+              ),
+              const SizedBox(height: 64),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: OutlinedButton(
+                  onPressed: () => _resetWallet(context),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.redAccent,
+                    side: const BorderSide(color: Colors.redAccent),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: LocalizedText(
+                    'reset-wallet-btn',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    appContext: appContext,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

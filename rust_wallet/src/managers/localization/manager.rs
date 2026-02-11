@@ -136,9 +136,12 @@ impl LocalizationManager {
                 };
                 match result {
                     Some(text) => Just::new(text).map_infallible_to_error().into_boxed(),
-                    None => Throw::new(WalletError::LocalizationTextNotFound(text_id.clone()))
-                        .map_infallible_to_value()
-                        .into_boxed(),
+                    None => {
+                        log::warn!("Localization text not found: {}", text_id);
+                        Throw::new(WalletError::LocalizationTextNotFound(text_id.clone()))
+                            .map_infallible_to_value()
+                            .into_boxed()
+                    }
                 }
             })
     }

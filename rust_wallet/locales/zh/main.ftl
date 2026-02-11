@@ -21,8 +21,8 @@ hot-wallet-desc-2 = 设备保持在线，便捷交易
 reset-wallet-failed = 重置失败: {$error}
 reset-wallet-btn = 重置钱包 (回到引导页)
 
-lang-title = 选择语言
-lang-desc = 选择您偏好的语言
+settings-title = 设置
+settings-language = 语言
 lang-en = English
 lang-zh = 简体中文
 lang-system = 跟随系统

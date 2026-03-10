@@ -1,0 +1,17 @@
+[package]
+name = "rust_secret"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+thiserror = "2.0.17"
+
+rkyv = "0.8.15"
+
+rand = "0.10.0"
+argon2 = "0.5.3"
+aes-gcm = "0.10.3"
+x25519-dalek = {version = "2.0.1", features = ["getrandom", "static_secrets"]}
+hkdf = "0.12.4"
+sha2 = "0.10.9"
+zeroize = "1.8.2"

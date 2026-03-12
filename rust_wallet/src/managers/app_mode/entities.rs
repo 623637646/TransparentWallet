@@ -1,7 +1,7 @@
 use sea_orm::entity::prelude::*;
 
 #[sea_orm::model]
-#[derive(Debug, Clone, PartialEq, Eq, DeriveEntityModel)]
+#[derive(Debug, Clone, PartialEq, Eq, DeriveEntityModel, Default)]
 #[sea_orm(table_name = "app_mode")]
 pub struct Model {
     #[sea_orm(primary_key)]
@@ -11,13 +11,14 @@ pub struct Model {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum)]
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Default)]
 #[sea_orm(
     rs_type = "String",
     db_type = "String(StringLen::None)",
     rename_all = "camelCase"
 )]
 pub enum AppMode {
+    #[default]
     Init,
     ColdWallet,
     HotWallet,

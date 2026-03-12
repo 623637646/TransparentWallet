@@ -2,7 +2,7 @@ use sea_orm::entity::prelude::*;
 use strum_macros::Display;
 
 #[sea_orm::model]
-#[derive(Debug, Clone, PartialEq, Eq, DeriveEntityModel)]
+#[derive(Debug, Clone, PartialEq, Eq, DeriveEntityModel, Default)]
 #[sea_orm(table_name = "localization")]
 pub struct Model {
     #[sea_orm(primary_key)]

@@ -1,6 +1,9 @@
 use crate::{
     error::WalletError,
-    managers::localization::{Language, repository::LocalizationRepository},
+    managers::{
+        db::Repository,
+        localization::{self, Language},
+    },
 };
 use fluent_langneg::{NegotiationStrategy, negotiate_languages};
 use fluent_templates::{Loader, static_loader};
@@ -42,17 +45,17 @@ pub struct LocalizationManager {
 
 impl LocalizationManager {
     pub(crate) async fn new(
-        repository: impl LocalizationRepository + Send + Sync + 'static,
+        repository: impl Repository + Send + Sync + 'static,
     ) -> Result<Self, WalletError> {
-        let app_mode = repository.get_localization().await?;
-        let selected_language = BehaviorSubject::new(app_mode.language.clone());
+        let model = repository.read::<localization::Entity>().await?;
+        let selected_language = BehaviorSubject::new(model.language.clone());
 
         // Subscribe to selected language changes and save to repository.
         let sub = selected_language.clone().skip(1).subscribe_with_callback(
             move |value| {
-                let mut app_mode = app_mode.clone();
-                app_mode.language = value;
-                tokio::spawn(repository.set_localization(app_mode).map(|res| {
+                let mut model = model.clone();
+                model.language = value;
+                tokio::spawn(repository.write::<localization::Entity>(model).map(|res| {
                     if let Err(e) = res {
                         log::error!("set_localization error: {}", e);
                     }

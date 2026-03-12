@@ -15,3 +15,6 @@ sea-orm = { version = "2.0.0-rc.19", features = [ "sqlx-sqlite", "runtime-tokio-
 fluent-templates = "0.13.2"
 fluent-bundle = "0.16.0"
 fluent-langneg = "0.14.2"
+
+rust_secret = { path = "../rust_secret" }
+

@@ -10,7 +10,7 @@ crate-type = ["cdylib", "staticlib"]
 anyhow = "1.0.100"
 tokio = { version = "1.48.0", features = ["full"] }
 rx-rust = { version = "0.3.0", features = ["tokio-scheduler"] }
-rust_wallet = { path = "../rust_wallet", version = "0.1.0" }
+rust_wallet = { path = "../rust_wallet" }
 flutter_rust_bridge = "=2.11.1"
 
 [lints.rust]

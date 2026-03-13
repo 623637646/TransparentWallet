@@ -7,6 +7,7 @@ import 'package:transparent_wallet/src/utils/bridge_helper.dart';
 import 'package:transparent_wallet/src/widgets/cold_wallet_demo_page.dart';
 import 'package:transparent_wallet/src/widgets/hot_wallet_demo_page.dart';
 import 'package:transparent_wallet/src/widgets/intro_page.dart';
+import 'package:transparent_wallet/src/widgets/pin_gate.dart';
 import 'common/localized_text.dart';
 
 class MyApp extends StatelessWidget {
@@ -115,7 +116,10 @@ class MyApp extends StatelessWidget {
               space: 1,
             ),
           ),
-          home: WalletModeRouter(appContext: appContext),
+          home: PinGate(
+            appContext: appContext,
+            child: WalletModeRouter(appContext: appContext),
+          ),
         );
       },
     );

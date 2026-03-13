@@ -7,7 +7,4 @@ pub enum WalletError {
 
     #[error("Database error: {0}")]
     DBError(#[from] sea_orm::DbErr),
-
-    #[error("Localization text not found for id: {0}")]
-    LocalizationTextNotFound(String),
 }

@@ -7,7 +7,7 @@ use rkyv::{Archive, Deserialize, Serialize};
 
 pub(crate) const SYMMETRIC_NONCE_LENGTH: usize = 12;
 
-#[derive(Archive, Deserialize, Serialize, Debug, PartialEq)]
+#[derive(Archive, Deserialize, Serialize, Debug, PartialEq, Clone)]
 #[rkyv(compare(PartialEq), derive(Debug))]
 pub(crate) struct EncryptedData {
     nonce: [u8; SYMMETRIC_NONCE_LENGTH],
@@ -43,7 +43,7 @@ mod tests {
     fn test_symmetric_encrypt_decrypt() {
         let key = [42u8; 32];
         let plaintext = b"hello secret world";
-        
+
         let encrypted = encrypt(&key, plaintext);
         assert_ne!(encrypted.ciphertext, plaintext); // Basic check it's encrypted
 
@@ -56,9 +56,9 @@ mod tests {
         let key = [42u8; 32];
         let wrong_key = [43u8; 32];
         let plaintext = b"hello secret world";
-        
+
         let encrypted = encrypt(&key, plaintext);
-        
+
         let result = decrypt(&wrong_key, &encrypted);
         assert!(result.is_none());
     }
@@ -67,9 +67,9 @@ mod tests {
     fn test_symmetric_tampered_ciphertext() {
         let key = [42u8; 32];
         let plaintext = b"hello secret world";
-        
+
         let mut encrypted = encrypt(&key, plaintext);
-        
+
         // Tamper with the ciphertext
         if let Some(last_byte) = encrypted.ciphertext.last_mut() {
             *last_byte ^= 1;
@@ -83,10 +83,10 @@ mod tests {
     fn test_symmetric_different_nonces() {
         let key = [42u8; 32];
         let plaintext = b"hello secret world";
-        
+
         let encrypted1 = encrypt(&key, plaintext);
         let encrypted2 = encrypt(&key, plaintext);
-        
+
         assert_ne!(encrypted1.nonce, encrypted2.nonce);
         assert_ne!(encrypted1.ciphertext, encrypted2.ciphertext);
     }

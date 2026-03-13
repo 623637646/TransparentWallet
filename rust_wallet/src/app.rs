@@ -2,7 +2,7 @@ use crate::{
     error::WalletError,
     managers::{
         app_mode::manager::AppModeManager, db::DBManager,
-        localization::manager::LocalizationManager,
+        localization::manager::LocalizationManager, pin::manager::PinManager,
     },
 };
 use std::path::Path;
@@ -10,6 +10,7 @@ use std::path::Path;
 pub struct WalletApp {
     pub app_mode_manager: AppModeManager,
     pub localization_manager: LocalizationManager,
+    pub pin_manager: PinManager,
 }
 
 impl WalletApp {
@@ -26,11 +27,15 @@ impl WalletApp {
         let app_mode_manager = AppModeManager::new(db_manager.clone()).await?;
 
         // Localization
-        let localization_manager = LocalizationManager::new(db_manager).await?;
+        let localization_manager = LocalizationManager::new(db_manager.clone()).await?;
+
+        // Pin
+        let pin_manager = PinManager::new(db_manager.clone()).await?;
 
         Ok(Self {
             app_mode_manager,
             localization_manager,
+            pin_manager,
         })
     }
 }

@@ -1,8 +1,13 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:transparent_wallet/src/rust/api/context.dart';
 import 'package:transparent_wallet/src/rust/api/app_mode.dart';
+import 'package:transparent_wallet/src/rust/utils/never.dart';
+import 'package:transparent_wallet/src/utils/bridge_helper.dart';
+import 'package:transparent_wallet/src/utils/device_secret.dart';
 import 'package:transparent_wallet/src/widgets/settings_page.dart';
 import 'common/localized_text.dart';
+import 'common/pin_input_sheet.dart';
 
 class IntroPage extends StatefulWidget {
   const IntroPage({super.key, required this.appContext});
@@ -16,6 +21,7 @@ class IntroPage extends StatefulWidget {
 class _IntroPageState extends State<IntroPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  late final Future<List<int>> _deviceSecretFuture;
 
   final List<_IntroSlide> _slides = [
     const _IntroSlide(
@@ -39,6 +45,12 @@ class _IntroPageState extends State<IntroPage> {
     ),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _deviceSecretFuture = DeviceSecretManager.getDeviceSecretBytes();
+  }
+
   void _onNext() {
     if (_currentPage < _slides.length - 1) {
       _pageController.nextPage(
@@ -49,21 +61,145 @@ class _IntroPageState extends State<IntroPage> {
   }
 
   Future<void> _setAppMode(AppMode mode) async {
+    switch (mode) {
+      case AppMode.coldWallet:
+        await _ensurePinThenSwitchToCold();
+        return;
+      case AppMode.hotWallet:
+      case AppMode.init:
+        await _switchMode(mode);
+    }
+  }
+
+  Future<List<int>?> _getDeviceSecretOrShowError(String errorTextId) async {
+    try {
+      return await _deviceSecretFuture;
+    } catch (e) {
+      _showLocalizedSnack(errorTextId, args: {'error': e.toString()});
+      return null;
+    }
+  }
+
+  Future<void> _ensurePinThenSwitchToCold() async {
+    final hasPin = await _getHasPinOnce();
+    if (hasPin == null) return; // Already handled error display
+
+    if (!hasPin) {
+      final newPin = await _promptPinTwice(
+        titleKey: 'pin-create-title',
+        firstSubtitleKey: 'pin-create-subtitle',
+        confirmSubtitleKey: 'pin-create-confirm-subtitle',
+      );
+      if (newPin == null) return;
+
+      final deviceSecret =
+          await _getDeviceSecretOrShowError('err-pin-create');
+      if (deviceSecret == null) return;
+
+      try {
+        await widget.appContext.createPin(
+          pin: utf8.encode(newPin),
+          deviceSecret: deviceSecret,
+        );
+        _showLocalizedSnack('msg-pin-created');
+      } catch (error) {
+        _showLocalizedSnack(
+          'err-pin-create',
+          args: {'error': error.toString()},
+        );
+        return;
+      }
+    }
+
+    await _switchMode(AppMode.coldWallet);
+  }
+
+  Future<bool?> _getHasPinOnce() async {
+    try {
+      final stream = convertSubscriptionToStream<bool, BridgeNever>((
+        onNext,
+        onTermination,
+      ) {
+        return widget.appContext.hasPinStream(
+          onNext: onNext,
+          onTermination: onTermination,
+        );
+      });
+      return await stream.first;
+    } catch (error) {
+      _showLocalizedSnack(
+        'error-setting-mode',
+        args: {'error': error.toString()},
+      );
+      return null;
+    }
+  }
+
+  Future<void> _switchMode(AppMode mode) async {
     try {
       await widget.appContext.setAppMode(appMode: mode);
     } catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: LocalizedText(
-            'error-setting-mode',
-            args: {'error': error.toString()},
-            appContext: widget.appContext,
-          ),
-          backgroundColor: Colors.redAccent,
-        ),
+      _showLocalizedSnack(
+        'error-setting-mode',
+        args: {'error': error.toString()},
       );
     }
+  }
+
+  Future<String?> _promptPinTwice({
+    required String titleKey,
+    required String firstSubtitleKey,
+    required String confirmSubtitleKey,
+  }) async {
+    final first = await showPinInputSheet(
+      context: context,
+      appContext: widget.appContext,
+      titleKey: titleKey,
+      subtitleKey: firstSubtitleKey,
+    );
+    if (!mounted) return null;
+    if (first == null) return null;
+    if (first.length != 6) {
+      _showLocalizedSnack('err-pin-length');
+      return null;
+    }
+
+    final confirm = await showPinInputSheet(
+      context: context,
+      appContext: widget.appContext,
+      titleKey: titleKey,
+      subtitleKey: confirmSubtitleKey,
+    );
+    if (!mounted) return null;
+    if (confirm == null) return null;
+    if (confirm.length != 6) {
+      _showLocalizedSnack('err-pin-length');
+      return null;
+    }
+
+    if (first != confirm) {
+      _showLocalizedSnack('err-pin-mismatch');
+      return null;
+    }
+
+    return first;
+  }
+
+  void _showLocalizedSnack(String textId, {Map<String, String>? args}) {
+    if (!mounted) return;
+    final resolvedArgs = args ?? const <String, String>{};
+    widget.appContext.lookupLocalWithArgs(
+      textId: textId,
+      args: resolvedArgs,
+      onNext: (msg) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(msg)));
+        }
+      },
+      onTermination: (_) {},
+    );
   }
 
   @override

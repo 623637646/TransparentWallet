@@ -1,9 +1,6 @@
-use crate::{
-    error::WalletError,
-    managers::{
-        db::Repository,
-        localization::{self, Language},
-    },
+use crate::managers::{
+    db::Repository,
+    localization::{self, Language},
 };
 use fluent_langneg::{NegotiationStrategy, negotiate_languages};
 use fluent_templates::{Loader, static_loader};
@@ -18,13 +15,21 @@ use rx_rust::{
     operators::creating::{just::Just, throw::Throw},
     subject::behavior_subject::BehaviorSubject,
 };
+use sea_orm::DbErr;
 use std::{collections::HashMap, convert::Infallible};
+use thiserror::Error;
 
 static_loader! {
     static LOCALES = {
         locales: "locales",
         fallback_language: "en",
     };
+}
+
+#[derive(Error, Debug)]
+pub enum LocalizationError {
+    #[error("Localization text not found for id: {0}")]
+    LocalizationTextNotFound(String),
 }
 
 pub struct LocalizationManager {
@@ -46,7 +51,7 @@ pub struct LocalizationManager {
 impl LocalizationManager {
     pub(crate) async fn new(
         repository: impl Repository + Send + Sync + 'static,
-    ) -> Result<Self, WalletError> {
+    ) -> Result<Self, DbErr> {
         let model = repository.read::<localization::Entity>().await?;
         let selected_language = BehaviorSubject::new(model.language.clone());
 
@@ -107,7 +112,7 @@ impl LocalizationManager {
     pub fn lookup(
         &self,
         text_id: String,
-    ) -> impl Observable<'static, 'static, String, WalletError> {
+    ) -> impl Observable<'static, 'static, String, LocalizationError> {
         self.lookup_impl(text_id, None)
     }
 
@@ -115,7 +120,7 @@ impl LocalizationManager {
         &self,
         text_id: String,
         args: HashMap<String, String>,
-    ) -> impl Observable<'static, 'static, String, WalletError> {
+    ) -> impl Observable<'static, 'static, String, LocalizationError> {
         self.lookup_impl(text_id, Some(args))
     }
 
@@ -123,7 +128,7 @@ impl LocalizationManager {
         &self,
         text_id: String,
         args: Option<HashMap<String, String>>,
-    ) -> impl Observable<'static, 'static, String, WalletError> {
+    ) -> impl Observable<'static, 'static, String, LocalizationError> {
         self.effective_language
             .clone()
             .map_infallible_to_error()
@@ -141,7 +146,7 @@ impl LocalizationManager {
                     Some(text) => Just::new(text).map_infallible_to_error().into_boxed(),
                     None => {
                         log::warn!("Localization text not found: {}", text_id);
-                        Throw::new(WalletError::LocalizationTextNotFound(text_id.clone()))
+                        Throw::new(LocalizationError::LocalizationTextNotFound(text_id.clone()))
                             .map_infallible_to_value()
                             .into_boxed()
                     }

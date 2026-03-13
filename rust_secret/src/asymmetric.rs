@@ -7,7 +7,7 @@ use zeroize::Zeroize;
 
 const DERIVATION_KEY: &[u8] = b"derivation_key";
 
-#[derive(Archive, Deserialize, Serialize, Debug, PartialEq)]
+#[derive(Archive, Deserialize, Serialize, Debug, PartialEq, Clone)]
 #[rkyv(compare(PartialEq), derive(Debug))]
 pub(crate) struct EncryptedData {
     salt: [u8; KEY_LENGTH_16],

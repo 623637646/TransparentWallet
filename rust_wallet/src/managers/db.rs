@@ -1,20 +1,17 @@
-use crate::error::WalletError;
 use sea_orm::{
-    ActiveModelTrait, ConnectOptions, Database, DatabaseConnection, EntityTrait, IntoActiveModel,
+    ActiveModelTrait, ConnectOptions, Database, DatabaseConnection, DbErr, EntityTrait,
+    IntoActiveModel,
 };
 use std::path::Path;
 
 pub(crate) trait Repository {
-    fn read<T>(&self) -> impl Future<Output = Result<T::Model, WalletError>> + Send + 'static
+    fn read<T>(&self) -> impl Future<Output = Result<T::Model, DbErr>> + Send + 'static
     where
         T: EntityTrait,
         T::Model: IntoActiveModel<T::ActiveModel> + Default,
         T::ActiveModel: Send;
 
-    fn write<T>(
-        &self,
-        model: T::Model,
-    ) -> impl Future<Output = Result<(), WalletError>> + Send + 'static
+    fn write<T>(&self, model: T::Model) -> impl Future<Output = Result<(), DbErr>> + Send + 'static
     where
         T: EntityTrait,
         T::Model: IntoActiveModel<T::ActiveModel>,
@@ -25,7 +22,7 @@ pub(crate) trait Repository {
 pub(crate) struct DBManager(DatabaseConnection);
 
 impl DBManager {
-    pub(crate) async fn new(working_path: &Path) -> Result<Self, WalletError> {
+    pub(crate) async fn new(working_path: &Path) -> Result<Self, DbErr> {
         let db_url = format!(
             "sqlite://{}?mode=rwc",
             working_path.join("wallet.db").to_str().unwrap()
@@ -46,7 +43,7 @@ impl DBManager {
 }
 
 impl Repository for DBManager {
-    fn read<T>(&self) -> impl Future<Output = Result<T::Model, WalletError>> + Send + 'static
+    fn read<T>(&self) -> impl Future<Output = Result<T::Model, DbErr>> + Send + 'static
     where
         T: EntityTrait,
         T::Model: IntoActiveModel<T::ActiveModel> + Default,
@@ -65,10 +62,7 @@ impl Repository for DBManager {
         }
     }
 
-    fn write<T>(
-        &self,
-        model: T::Model,
-    ) -> impl Future<Output = Result<(), WalletError>> + Send + 'static
+    fn write<T>(&self, model: T::Model) -> impl Future<Output = Result<(), DbErr>> + Send + 'static
     where
         T: EntityTrait,
         T::Model: IntoActiveModel<T::ActiveModel>,

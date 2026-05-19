@@ -281,10 +281,10 @@ class _PinSettingItemState extends State<_PinSettingItem> {
 
   void _showLocalizedError(String textId, {Map<String, String>? args}) {
     if (!mounted) return;
-    
+
     // We fetch the string once to show it in the SnackBar
     if (args != null) {
-      // In a real app we might use a dedicated future method for single-fetch translation, 
+      // In a real app we might use a dedicated future method for single-fetch translation,
       // but we can setup a short listener for now since the API only returns streams.
       widget.appContext.lookupLocalWithArgs(
         textId: textId,
@@ -360,7 +360,7 @@ class _PinSettingItemState extends State<_PinSettingItem> {
     if (oldPin == null || !mounted) return;
 
     final deviceSecret = await _getDeviceSecretOrShowError('err-pin-update');
-    if (deviceSecret == null) return;
+    if (deviceSecret == null || !mounted) return;
 
     final newPin = await showPinInputSheet(
       context: context,

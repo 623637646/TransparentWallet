@@ -1,6 +1,6 @@
 {
-    "name": "transparent_wallet",
-    "short_name": "transparent_wallet",
+    "name": "janus_wallet",
+    "short_name": "janus_wallet",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

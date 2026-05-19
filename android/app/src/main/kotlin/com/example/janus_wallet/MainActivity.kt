@@ -1,4 +1,4 @@
-package com.example.transparent_wallet
+package com.example.janus_wallet
 
 import io.flutter.embedding.android.FlutterActivity
 

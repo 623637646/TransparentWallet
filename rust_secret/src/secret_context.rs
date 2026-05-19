@@ -156,7 +156,7 @@ mod tests {
         let device_secret = b"my_device_secret";
         let ctx = SecretContext::new(pin, device_secret);
 
-        let plaintext = b"Hello, transparent wallet!";
+        let plaintext = b"Hello, janus wallet!";
 
         // Encrypt
         let ciphertext = ctx.encrypt(plaintext);
@@ -236,7 +236,7 @@ mod tests {
 
         let mut ctx = SecretContext::new(old_pin, device_secret);
 
-        let plaintext = b"Hello, transparent wallet!";
+        let plaintext = b"Hello, janus wallet!";
         let ciphertext = ctx.encrypt(plaintext);
 
         let old_salt = ctx.salt;

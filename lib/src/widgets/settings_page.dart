@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:transparent_wallet/src/rust/api/context.dart';
-import 'package:transparent_wallet/src/rust/api/localization.dart';
-import 'package:transparent_wallet/src/rust/utils/never.dart';
-import 'package:transparent_wallet/src/utils/bridge_helper.dart';
-import 'package:transparent_wallet/src/utils/device_secret.dart';
+import 'package:janus_wallet/src/rust/api/context.dart';
+import 'package:janus_wallet/src/rust/api/localization.dart';
+import 'package:janus_wallet/src/rust/utils/never.dart';
+import 'package:janus_wallet/src/utils/bridge_helper.dart';
+import 'package:janus_wallet/src/utils/device_secret.dart';
 import 'common/localized_text.dart';
 import 'common/pin_input_sheet.dart';
 

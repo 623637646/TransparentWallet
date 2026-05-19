@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:transparent_wallet/src/rust/api/app_mode.dart';
-import 'package:transparent_wallet/src/rust/api/context.dart';
+import 'package:janus_wallet/src/rust/api/app_mode.dart';
+import 'package:janus_wallet/src/rust/api/context.dart';
 import 'common/localized_text.dart';
 
 class ColdWalletDemoPage extends StatelessWidget {

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:logger/logger.dart';
-import 'package:transparent_wallet/src/rust/api/logger.dart';
-import 'package:transparent_wallet/src/rust/utils/never.dart';
-import 'package:transparent_wallet/src/utils/bridge_helper.dart';
+import 'package:janus_wallet/src/rust/api/logger.dart';
+import 'package:janus_wallet/src/rust/utils/never.dart';
+import 'package:janus_wallet/src/utils/bridge_helper.dart';
 
 final Logger logger = Logger(
   printer: PrettyPrinter(

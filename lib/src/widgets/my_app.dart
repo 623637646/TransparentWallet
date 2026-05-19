@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:transparent_wallet/src/rust/api/app_mode.dart';
-import 'package:transparent_wallet/src/rust/api/context.dart';
-import 'package:transparent_wallet/src/rust/utils/never.dart';
-import 'package:transparent_wallet/src/utils/bridge_helper.dart';
-import 'package:transparent_wallet/src/widgets/cold_wallet_demo_page.dart';
-import 'package:transparent_wallet/src/widgets/hot_wallet_demo_page.dart';
-import 'package:transparent_wallet/src/widgets/intro_page.dart';
-import 'package:transparent_wallet/src/widgets/pin_gate.dart';
+import 'package:janus_wallet/src/rust/api/app_mode.dart';
+import 'package:janus_wallet/src/rust/api/context.dart';
+import 'package:janus_wallet/src/rust/utils/never.dart';
+import 'package:janus_wallet/src/utils/bridge_helper.dart';
+import 'package:janus_wallet/src/widgets/cold_wallet_demo_page.dart';
+import 'package:janus_wallet/src/widgets/hot_wallet_demo_page.dart';
+import 'package:janus_wallet/src/widgets/intro_page.dart';
+import 'package:janus_wallet/src/widgets/pin_gate.dart';
 import 'common/localized_text.dart';
 
 class MyApp extends StatelessWidget {

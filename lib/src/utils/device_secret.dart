@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:transparent_wallet/src/utils/logger.dart';
+import 'package:janus_wallet/src/utils/logger.dart';
 
 class DeviceSecretManager {
   static const _storage = FlutterSecureStorage(

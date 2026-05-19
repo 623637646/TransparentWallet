@@ -8,7 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
   jni
-  rust_lib_transparent_wallet
+  rust_lib_janus_wallet
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

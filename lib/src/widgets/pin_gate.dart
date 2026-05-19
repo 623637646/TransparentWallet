@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:transparent_wallet/src/rust/api/context.dart';
-import 'package:transparent_wallet/src/utils/bridge_helper.dart';
-import 'package:transparent_wallet/src/utils/logger.dart';
+import 'package:janus_wallet/src/rust/api/context.dart';
+import 'package:janus_wallet/src/utils/bridge_helper.dart';
+import 'package:janus_wallet/src/utils/logger.dart';
 import 'common/pin_input_sheet.dart';
 
 /// Gate that prevents entering the app before PIN verification.
 class PinGate extends StatefulWidget {
-  const PinGate({
-    super.key,
-    required this.appContext,
-    required this.child,
-  });
+  const PinGate({super.key, required this.appContext, required this.child});
 
   final Context appContext;
   final Widget child;

@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "TransparentWallet (Flutter)",
+            "name": "janus_wallet (Flutter)",
             "program": "lib/main.dart",
             "request": "launch",
             "type": "dart"

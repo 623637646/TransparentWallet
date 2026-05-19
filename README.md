@@ -1,6 +1,6 @@
-# Transparent Wallet — A Secure Dual-Mode Cryptocurrency Wallet
+# Janus Wallet — A Secure Dual-Mode Cryptocurrency Wallet
 
-**Transparent Wallet** is a cryptocurrency wallet application designed with a **dual-mode architecture**:  
+**Janus Wallet** is a cryptocurrency wallet application designed with a **dual-mode architecture**:  
 **Cold Wallet Mode** and **Hot Wallet Mode**.  
 At any given time, one instance of the program can only operate in one mode.
 
@@ -43,7 +43,7 @@ In this mode, private keys are **never exposed** — all signing occurs exclusiv
 
 ## 🔄 Cold & Hot Wallet Interaction
 
-Users can run two instances of Transparent Wallet simultaneously — one in **Cold Mode** and one in **Hot Mode**.  
+Users can run two instances of Janus Wallet simultaneously — one in **Cold Mode** and one in **Hot Mode**.  
 The two wallets **communicate entirely via QR codes**, creating a **fully air-gapped and verifiable workflow**.
 
 The process flow is as follows:
@@ -63,6 +63,6 @@ The process flow is as follows:
 
 ---
 
-This **QR-based offline communication** model ensures that all cryptographic operations are **transparent, secure, and auditable**.  
+This **QR-based offline communication** model ensures that all cryptographic operations are **Janus, secure, and auditable**.  
 It combines the **convenience of a hot wallet** with the **security of a cold wallet**,  
-which is the inspiration behind the name **Transparent Wallet**.
+which is the inspiration behind the name **Janus Wallet**.

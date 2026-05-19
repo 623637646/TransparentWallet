@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:transparent_wallet/src/rust/api/context.dart';
-import 'package:transparent_wallet/src/rust/api/app_mode.dart';
-import 'package:transparent_wallet/src/rust/utils/never.dart';
-import 'package:transparent_wallet/src/utils/bridge_helper.dart';
-import 'package:transparent_wallet/src/utils/device_secret.dart';
-import 'package:transparent_wallet/src/widgets/settings_page.dart';
+import 'package:janus_wallet/src/rust/api/context.dart';
+import 'package:janus_wallet/src/rust/api/app_mode.dart';
+import 'package:janus_wallet/src/rust/utils/never.dart';
+import 'package:janus_wallet/src/utils/bridge_helper.dart';
+import 'package:janus_wallet/src/utils/device_secret.dart';
+import 'package:janus_wallet/src/widgets/settings_page.dart';
 import 'common/localized_text.dart';
 import 'common/pin_input_sheet.dart';
 
@@ -92,8 +92,7 @@ class _IntroPageState extends State<IntroPage> {
       );
       if (newPin == null) return;
 
-      final deviceSecret =
-          await _getDeviceSecretOrShowError('err-pin-create');
+      final deviceSecret = await _getDeviceSecretOrShowError('err-pin-create');
       if (deviceSecret == null) return;
 
       try {

@@ -1,5 +1,5 @@
-app-name = Transparent Wallet
-intro-title-1 = Transparent Wallet
+app-name = Janus Wallet
+intro-title-1 = Janus Wallet
 intro-desc-1 = Safe, transparent, and easy-to-use digital asset management tool
 intro-title-2 = Safety First
 intro-desc-2 = Support cold and hot wallet modes, private keys are completely under your control

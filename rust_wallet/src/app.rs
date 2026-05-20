@@ -8,9 +8,9 @@ use crate::{
 use std::path::Path;
 
 pub struct WalletApp {
-    pub app_mode_manager: AppModeManager,
-    pub localization_manager: LocalizationManager,
-    pub pin_manager: PinManager,
+    pub app_mode_manager: AppModeManager<DBManager>,
+    pub localization_manager: LocalizationManager<DBManager>,
+    pub pin_manager: PinManager<DBManager>,
 }
 
 impl WalletApp {

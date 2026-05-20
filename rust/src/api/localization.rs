@@ -4,7 +4,6 @@ use crate::utils::never::BridgeNever;
 use flutter_rust_bridge::{frb, DartFnFuture};
 pub use rust_wallet::managers::localization::entities::Language;
 use rx_rust::observable::observable_ext::ObservableExt;
-use rx_rust::observer::Observer;
 use rx_rust::operators::creating::throw::Throw;
 use std::collections::HashMap;
 
@@ -24,8 +23,7 @@ impl Context {
             |_| {
                 self.0
                     .localization_manager
-                    .selected_language
-                    .clone()
+                    .selected_language()
                     .map_infallible_to_error()
             },
             on_next,
@@ -34,16 +32,17 @@ impl Context {
     }
 
     pub async fn set_language(&mut self, language: Option<Language>) {
-        self.0
+        let _ = self
+            .0
             .localization_manager
-            .selected_language
-            .on_next(language);
+            .set_selected_language(language)
+            .await;
     }
 
     pub async fn set_system_languages(&mut self, languages: Vec<String>) {
         self.0
             .localization_manager
-            .update_system_language(languages);
+            .set_supported_system_languages(languages);
     }
 
     pub async fn lookup_local(

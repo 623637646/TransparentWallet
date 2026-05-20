@@ -1,12 +1,10 @@
 use crate::managers::{
-    db::Repository,
+    db::{DBError, Repository},
     localization::{self, Language},
 };
 use fluent_langneg::{NegotiationStrategy, negotiate_languages};
 use fluent_templates::{Loader, static_loader};
-use futures::FutureExt;
 use rx_rust::{
-    disposable::subscription::Subscription,
     observable::{
         Observable, cloneable_boxed_observable::CloneableBoxedObservable,
         observable_ext::ObservableExt,
@@ -15,7 +13,6 @@ use rx_rust::{
     operators::creating::{just::Just, throw::Throw},
     subject::behavior_subject::BehaviorSubject,
 };
-use sea_orm::DbErr;
 use std::{collections::HashMap, convert::Infallible};
 use thiserror::Error;
 
@@ -32,9 +29,10 @@ pub enum LocalizationError {
     LocalizationTextNotFound(String),
 }
 
-pub struct LocalizationManager {
+pub struct LocalizationManager<R> {
+    repository: R,
     // User selected language. None means use selected system language.
-    pub selected_language: BehaviorSubject<'static, Option<Language>, Infallible>,
+    selected_language: BehaviorSubject<'static, localization::Model, Infallible>,
     // Languages from system settings.
     system_language: BehaviorSubject<'static, Vec<fluent_langneg::LanguageIdentifier>, Infallible>,
     // Effective language used for lookup.
@@ -45,35 +43,22 @@ pub struct LocalizationManager {
         fluent_templates::LanguageIdentifier,
         Infallible,
     >,
-    _subscription: Subscription<'static>,
 }
 
-impl LocalizationManager {
-    pub(crate) async fn new(
-        repository: impl Repository + Send + Sync + 'static,
-    ) -> Result<Self, DbErr> {
+impl<R> LocalizationManager<R>
+where
+    R: Repository,
+{
+    pub(crate) async fn new(repository: R) -> Result<Self, DBError> {
         let model = repository.read::<localization::Entity>().await?;
-        let selected_language = BehaviorSubject::new(model.language.clone());
-
-        // Subscribe to selected language changes and save to repository.
-        let sub = selected_language.clone().skip(1).subscribe_with_callback(
-            move |value| {
-                let mut model = model.clone();
-                model.language = value;
-                tokio::spawn(repository.write::<localization::Entity>(model).map(|res| {
-                    if let Err(e) = res {
-                        log::error!("set_localization error: {}", e);
-                    }
-                }));
-            },
-            |_| unreachable!(),
-        );
+        let selected_language = BehaviorSubject::new(model);
 
         // Create effective language.
         let system_language = BehaviorSubject::new(Vec::new());
         let system_language_cloned = system_language.clone();
         let effective_language = selected_language
             .clone()
+            .map(|model| model.language)
             .flat_map(move |language| match language {
                 Some(language) => Just::new((&language).into()).into_boxed(),
                 None => system_language_cloned
@@ -102,11 +87,42 @@ impl LocalizationManager {
             .into_cloneable_boxed();
 
         Ok(Self {
+            repository,
             selected_language,
             system_language,
             effective_language,
-            _subscription: sub,
         })
+    }
+
+    pub fn selected_language(
+        &self,
+    ) -> impl Observable<'static, 'static, Option<Language>, Infallible> + Clone {
+        self.selected_language.clone().map(|model| model.language)
+    }
+
+    pub async fn set_selected_language(
+        &self,
+        selected_language: Option<Language>,
+    ) -> Result<(), DBError> {
+        let mut model = self.selected_language.value();
+        model.language = selected_language;
+        self.repository
+            .write::<localization::Entity>(model.clone())
+            .await
+            .inspect_err(|e| {
+                log::error!("write localization error: {}", e);
+            })?;
+        self.selected_language.clone().on_next(model);
+        Ok(())
+    }
+
+    pub fn set_supported_system_languages(&mut self, languages: Vec<String>) {
+        self.system_language.on_next(
+            languages
+                .into_iter()
+                .filter_map(|s| s.parse().ok())
+                .collect(),
+        );
     }
 
     pub fn lookup(
@@ -152,15 +168,6 @@ impl LocalizationManager {
                     }
                 }
             })
-    }
-
-    pub fn update_system_language(&mut self, languages: Vec<String>) {
-        self.system_language.on_next(
-            languages
-                .into_iter()
-                .filter_map(|s| s.parse().ok())
-                .collect(),
-        );
     }
 }
 

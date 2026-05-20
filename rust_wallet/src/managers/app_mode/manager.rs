@@ -1,42 +1,46 @@
 use crate::managers::{
     app_mode::{self, AppMode},
-    db::Repository,
+    db::{DBError, Repository},
 };
-use futures::FutureExt;
 use rx_rust::{
-    disposable::subscription::Subscription, observable::observable_ext::ObservableExt,
+    observable::{Observable, observable_ext::ObservableExt},
+    observer::Observer,
     subject::behavior_subject::BehaviorSubject,
 };
-use sea_orm::DbErr;
 use std::convert::Infallible;
 
-pub struct AppModeManager {
-    pub current_app_mode: BehaviorSubject<'static, AppMode, Infallible>,
-    _subscription: Subscription<'static>,
+pub struct AppModeManager<R> {
+    repository: R,
+    app_mode: BehaviorSubject<'static, app_mode::Model, Infallible>,
 }
 
-impl AppModeManager {
-    pub(crate) async fn new(
-        repository: impl Repository + Send + Sync + 'static,
-    ) -> Result<Self, DbErr> {
+impl<R> AppModeManager<R>
+where
+    R: Repository,
+{
+    pub(crate) async fn new(repository: R) -> Result<Self, DBError> {
         let model = repository.read::<app_mode::Entity>().await?;
-        let current_app_mode = BehaviorSubject::new(model.app_mode.clone());
-        let sub = current_app_mode.clone().skip(1).subscribe_with_callback(
-            move |value| {
-                let mut model = model.clone();
-                model.app_mode = value;
-                tokio::spawn(repository.write::<app_mode::Entity>(model).map(|res| {
-                    if let Err(e) = res {
-                        log::error!("set_app_mode error: {}", e);
-                    }
-                }));
-            },
-            |_| unreachable!(),
-        );
-
+        let app_mode = BehaviorSubject::new(model);
         Ok(Self {
-            current_app_mode,
-            _subscription: sub,
+            repository,
+            app_mode,
         })
+    }
+
+    pub fn app_mode(&self) -> impl Observable<'static, 'static, AppMode, Infallible> + Clone {
+        self.app_mode.clone().map(|model| model.app_mode)
+    }
+
+    pub async fn set_app_mode(&self, app_mode: AppMode) -> Result<(), DBError> {
+        let mut model = self.app_mode.value();
+        model.app_mode = app_mode;
+        self.repository
+            .write::<app_mode::Entity>(model.clone())
+            .await
+            .inspect_err(|e| {
+                log::error!("write app mode error: {}", e);
+            })?;
+        self.app_mode.clone().on_next(model);
+        Ok(())
     }
 }

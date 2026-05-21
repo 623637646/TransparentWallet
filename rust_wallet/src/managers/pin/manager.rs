@@ -1,7 +1,7 @@
 use crate::{
     error::WalletError,
     managers::{
-        db::{DBError, Repository},
+        db::{Repository, RepositoryError},
         pin,
     },
 };
@@ -41,7 +41,7 @@ impl<R> PinManager<R>
 where
     R: Repository,
 {
-    pub(crate) async fn new(repository: R) -> Result<Self, DBError> {
+    pub(crate) async fn new(repository: R) -> Result<Self, RepositoryError> {
         let model = repository.read::<pin::Entity>().await?;
         let model = BehaviorSubject::new(model);
         Ok(Self { repository, model })
@@ -148,7 +148,9 @@ mod tests {
         let db = DBManager::new_memory_db()
             .await
             .expect("memory db should be created");
-        PinManager::new(db).await.expect("pin manager should be created")
+        PinManager::new(db)
+            .await
+            .expect("pin manager should be created")
     }
 
     fn assert_verify_pin(
@@ -265,9 +267,7 @@ mod tests {
             .await
             .expect("create pin should succeed");
 
-        let result = manager
-            .update_pin(WRONG_PIN, NEW_PIN, DEVICE_SECRET)
-            .await;
+        let result = manager.update_pin(WRONG_PIN, NEW_PIN, DEVICE_SECRET).await;
 
         assert!(matches!(
             result,

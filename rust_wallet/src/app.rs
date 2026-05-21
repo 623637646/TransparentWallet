@@ -15,11 +15,6 @@ pub struct WalletApp {
 
 impl WalletApp {
     pub async fn new(working_dir: &Path) -> Result<Self, WalletError> {
-        // Create working folder if it doesn't exist
-        if !working_dir.exists() {
-            std::fs::create_dir(working_dir)?;
-        }
-
         // Data base
         let db_manager = DBManager::new(working_dir).await?;
 

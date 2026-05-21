@@ -5,13 +5,16 @@ use std::path::Path;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum DBError {
+pub enum RepositoryError {
     #[error("Database error: {0}")]
     DBError(#[from] sea_orm::DbErr),
+
+    #[error("IO error: {0}")]
+    IOError(#[from] std::io::Error),
 }
 
 pub trait Repository {
-    fn read<T>(&self) -> impl Future<Output = Result<T::Model, DBError>> + Send + 'static
+    fn read<T>(&self) -> impl Future<Output = Result<T::Model, RepositoryError>> + Send + 'static
     where
         T: EntityTrait,
         T::Model: IntoActiveModel<T::ActiveModel> + Default,
@@ -20,7 +23,7 @@ pub trait Repository {
     fn write<T>(
         &self,
         model: T::Model,
-    ) -> impl Future<Output = Result<(), DBError>> + Send + 'static
+    ) -> impl Future<Output = Result<(), RepositoryError>> + Send + 'static
     where
         T: EntityTrait,
         T::Model: IntoActiveModel<T::ActiveModel>,
@@ -31,7 +34,12 @@ pub trait Repository {
 pub struct DBManager(DatabaseConnection);
 
 impl DBManager {
-    pub(crate) async fn new(working_path: &Path) -> Result<Self, DBError> {
+    pub(crate) async fn new(working_path: &Path) -> Result<Self, RepositoryError> {
+        // Create working folder if it doesn't exist
+        if !working_path.exists() {
+            std::fs::create_dir(working_path)?;
+        }
+
         let db_url = format!(
             "sqlite://{}?mode=rwc",
             working_path.join("wallet.db").to_str().unwrap()
@@ -47,7 +55,7 @@ impl DBManager {
     }
 
     #[cfg(test)]
-    pub(crate) async fn new_memory_db() -> Result<Self, DBError> {
+    pub(crate) async fn new_memory_db() -> Result<Self, RepositoryError> {
         let db = Database::connect("sqlite::memory:").await?;
         db.get_schema_registry(module_path!().split("::").next().unwrap())
             .sync(&db)
@@ -61,7 +69,7 @@ impl DBManager {
 }
 
 impl Repository for DBManager {
-    fn read<T>(&self) -> impl Future<Output = Result<T::Model, DBError>> + Send + 'static
+    fn read<T>(&self) -> impl Future<Output = Result<T::Model, RepositoryError>> + Send + 'static
     where
         T: EntityTrait,
         T::Model: IntoActiveModel<T::ActiveModel> + Default,
@@ -83,7 +91,7 @@ impl Repository for DBManager {
     fn write<T>(
         &self,
         model: T::Model,
-    ) -> impl Future<Output = Result<(), DBError>> + Send + 'static
+    ) -> impl Future<Output = Result<(), RepositoryError>> + Send + 'static
     where
         T: EntityTrait,
         T::Model: IntoActiveModel<T::ActiveModel>,

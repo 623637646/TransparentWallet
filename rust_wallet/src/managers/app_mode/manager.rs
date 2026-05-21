@@ -1,6 +1,6 @@
 use crate::managers::{
     app_mode::{self, AppMode},
-    db::{DBError, Repository},
+    db::{RepositoryError, Repository},
 };
 use rx_rust::{
     observable::{Observable, observable_ext::ObservableExt},
@@ -18,7 +18,7 @@ impl<R> AppModeManager<R>
 where
     R: Repository,
 {
-    pub(crate) async fn new(repository: R) -> Result<Self, DBError> {
+    pub(crate) async fn new(repository: R) -> Result<Self, RepositoryError> {
         let model = repository.read::<app_mode::Entity>().await?;
         let app_mode = BehaviorSubject::new(model);
         Ok(Self {
@@ -31,7 +31,7 @@ where
         self.app_mode.clone().map(|model| model.app_mode)
     }
 
-    pub async fn set_app_mode(&self, app_mode: AppMode) -> Result<(), DBError> {
+    pub async fn set_app_mode(&self, app_mode: AppMode) -> Result<(), RepositoryError> {
         let mut model = self.app_mode.value();
         model.app_mode = app_mode;
         self.repository

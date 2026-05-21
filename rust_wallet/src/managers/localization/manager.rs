@@ -1,5 +1,5 @@
 use crate::managers::{
-    db::{DBError, Repository},
+    db::{RepositoryError, Repository},
     localization::{self, Language},
 };
 use fluent_langneg::{NegotiationStrategy, negotiate_languages};
@@ -49,7 +49,7 @@ impl<R> LocalizationManager<R>
 where
     R: Repository,
 {
-    pub(crate) async fn new(repository: R) -> Result<Self, DBError> {
+    pub(crate) async fn new(repository: R) -> Result<Self, RepositoryError> {
         let model = repository.read::<localization::Entity>().await?;
         let selected_language = BehaviorSubject::new(model);
 
@@ -103,7 +103,7 @@ where
     pub async fn set_selected_language(
         &self,
         selected_language: Option<Language>,
-    ) -> Result<(), DBError> {
+    ) -> Result<(), RepositoryError> {
         let mut model = self.selected_language.value();
         model.language = selected_language;
         self.repository

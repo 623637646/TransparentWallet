@@ -6,6 +6,16 @@
 			"type": "shell",
 			"command": "rm -rf lib/src/rust/* && rm -f rust/src/frb_generated.rs && flutter_rust_bridge_codegen generate",
 			"problemMatcher": []
+		},
+		{
+			"label": "Run Rust Tests",
+			"type": "shell",
+			"command": "for toml in $(find . -name Cargo.toml -not -path '*/target/*' -not -path '*/.*'); do cargo test --manifest-path \"$toml\" || exit 1; done",
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			}
 		}
 	]
 }

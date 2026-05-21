@@ -17,26 +17,22 @@ impl Context {
         )
     }
 
-    pub async fn create_pin(&self, pin: &[u8], device_secret: &[u8]) -> bool {
-        self.0.pin_manager.create(pin, device_secret).await.is_ok()
+    pub async fn create_pin(&self, pin: &[u8]) -> anyhow::Result<()> {
+        self.0.pin_manager.create(pin).await?;
+        Ok(())
     }
 
-    pub async fn delete_pin(&self) -> bool {
-        self.0.pin_manager.delete_pin().await.is_ok()
+    pub async fn delete_pin(&self) -> anyhow::Result<()> {
+        self.0.pin_manager.delete_pin().await?;
+        Ok(())
     }
 
-    pub async fn update_pin(&self, old_pin: &[u8], new_pin: &[u8], device_secret: &[u8]) -> bool {
-        self.0
-            .pin_manager
-            .update_pin(old_pin, new_pin, device_secret)
-            .await
-            .is_ok()
+    pub async fn update_pin(&self, old_pin: &[u8], new_pin: &[u8]) -> anyhow::Result<()> {
+        self.0.pin_manager.update_pin(old_pin, new_pin).await?;
+        Ok(())
     }
 
-    pub async fn verify_pin(&self, pin: &[u8], device_secret: &[u8]) -> bool {
-        self.0
-            .pin_manager
-            .verify_pin(pin, device_secret)
-            .unwrap_or(false)
+    pub async fn verify_pin(&self, pin: &[u8]) -> anyhow::Result<bool> {
+        Ok(self.0.pin_manager.verify_pin(pin).await?)
     }
 }

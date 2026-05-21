@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:janus_wallet/src/rust/api/context.dart';
 import 'package:janus_wallet/src/rust/frb_generated.dart';
 import 'package:janus_wallet/src/utils/logger.dart';
+import 'package:janus_wallet/src/utils/secure_storage.dart';
 import 'package:janus_wallet/src/widgets/my_app.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -29,7 +30,15 @@ Future<void> main() async {
   // Init context
   WidgetsFlutterBinding.ensureInitialized();
   final workingDir = await getDatabasesPath();
-  final context = await initContext(workingDir: workingDir);
+  final secureStorageManager = SecureStorageManager();
+  final writer = secureStorageManager.writer();
+  final reader = secureStorageManager.reader();
+
+  final context = await initContext(
+    workingDir: workingDir,
+    writer: writer,
+    reader: reader,
+  );
 
   // Set initial system languages
   await updateSystemLanguages(context);

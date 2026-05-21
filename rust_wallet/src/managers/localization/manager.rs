@@ -1,5 +1,5 @@
 use crate::managers::{
-    db::{RepositoryError, Repository},
+    db::{Repository, RepositoryError},
     localization::{self, Language},
 };
 use fluent_langneg::{NegotiationStrategy, negotiate_languages};

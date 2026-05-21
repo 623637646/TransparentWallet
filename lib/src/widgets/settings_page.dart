@@ -4,7 +4,6 @@ import 'package:janus_wallet/src/rust/api/context.dart';
 import 'package:janus_wallet/src/rust/api/localization.dart';
 import 'package:janus_wallet/src/rust/utils/never.dart';
 import 'package:janus_wallet/src/utils/bridge_helper.dart';
-import 'package:janus_wallet/src/utils/device_secret.dart';
 import 'common/localized_text.dart';
 import 'common/pin_input_sheet.dart';
 
@@ -265,7 +264,6 @@ class _PinSettingItem extends StatefulWidget {
 
 class _PinSettingItemState extends State<_PinSettingItem> {
   late final Stream<bool> _hasPinStream;
-  late final Future<List<int>> _deviceSecretFuture;
 
   @override
   void initState() {
@@ -276,7 +274,6 @@ class _PinSettingItemState extends State<_PinSettingItem> {
         onTermination: onTermination,
       ),
     );
-    _deviceSecretFuture = DeviceSecretManager.getDeviceSecretBytes();
   }
 
   void _showLocalizedError(String textId, {Map<String, String>? args}) {
@@ -313,15 +310,6 @@ class _PinSettingItemState extends State<_PinSettingItem> {
     }
   }
 
-  Future<List<int>?> _getDeviceSecretOrShowError(String errorTextId) async {
-    try {
-      return await _deviceSecretFuture;
-    } catch (e) {
-      _showLocalizedError(errorTextId, args: {'error': e.toString()});
-      return null;
-    }
-  }
-
   Future<void> _handleCreatePin() async {
     final result = await showPinInputSheet(
       context: context,
@@ -334,14 +322,8 @@ class _PinSettingItemState extends State<_PinSettingItem> {
 
     if (result == null) return;
 
-    final deviceSecret = await _getDeviceSecretOrShowError('err-pin-create');
-    if (deviceSecret == null) return;
-
     try {
-      await widget.appContext.createPin(
-        pin: utf8.encode(result),
-        deviceSecret: deviceSecret,
-      );
+      await widget.appContext.createPin(pin: utf8.encode(result));
       _showLocalizedError('msg-pin-created');
     } catch (e) {
       _showLocalizedError('err-pin-create', args: {'error': e.toString()});
@@ -359,9 +341,6 @@ class _PinSettingItemState extends State<_PinSettingItem> {
 
     if (oldPin == null || !mounted) return;
 
-    final deviceSecret = await _getDeviceSecretOrShowError('err-pin-update');
-    if (deviceSecret == null || !mounted) return;
-
     final newPin = await showPinInputSheet(
       context: context,
       appContext: widget.appContext,
@@ -376,7 +355,6 @@ class _PinSettingItemState extends State<_PinSettingItem> {
       await widget.appContext.updatePin(
         oldPin: utf8.encode(oldPin),
         newPin: utf8.encode(newPin),
-        deviceSecret: deviceSecret,
       );
       _showLocalizedError('msg-pin-updated');
     } catch (e) {

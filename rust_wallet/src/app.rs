@@ -1,8 +1,11 @@
 use crate::{
     error::WalletError,
     managers::{
-        app_mode::manager::AppModeManager, db::DBManager,
-        localization::manager::LocalizationManager, pin::manager::PinManager,
+        app_mode::manager::AppModeManager,
+        db::DBManager,
+        localization::manager::LocalizationManager,
+        pin::manager::PinManager,
+        secure_storage::{SecureStorageManager, SecureStorageReader, SecureStorageWriter},
     },
 };
 use std::path::Path;
@@ -10,13 +13,20 @@ use std::path::Path;
 pub struct WalletApp {
     pub app_mode_manager: AppModeManager<DBManager>,
     pub localization_manager: LocalizationManager<DBManager>,
-    pub pin_manager: PinManager<DBManager>,
+    pub pin_manager: PinManager<DBManager, SecureStorageManager>,
 }
 
 impl WalletApp {
-    pub async fn new(working_dir: &Path) -> Result<Self, WalletError> {
+    pub async fn new(
+        working_dir: &Path,
+        writer: SecureStorageWriter,
+        reader: SecureStorageReader,
+    ) -> Result<Self, WalletError> {
         // Data base
         let db_manager = DBManager::new(working_dir).await?;
+
+        // Secure storage
+        let secure_storage_manager = SecureStorageManager::new(writer, reader);
 
         // App settings
         let app_mode_manager = AppModeManager::new(db_manager.clone()).await?;
@@ -25,7 +35,7 @@ impl WalletApp {
         let localization_manager = LocalizationManager::new(db_manager.clone()).await?;
 
         // Pin
-        let pin_manager = PinManager::new(db_manager.clone()).await?;
+        let pin_manager = PinManager::new(db_manager.clone(), secure_storage_manager).await?;
 
         Ok(Self {
             app_mode_manager,

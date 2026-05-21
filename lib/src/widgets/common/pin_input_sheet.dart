@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../rust/api/app_mode.dart';
 import '../../rust/api/context.dart';
-import '../../utils/device_secret.dart';
 import 'localized_text.dart';
 
 Future<String?> showPinInputSheet({
@@ -290,8 +289,9 @@ class _PinInputViewState extends State<PinInputView> {
     }
 
     return Container(
-      height:
-          widget.fullScreen ? null : MediaQuery.of(context).size.height * 0.9,
+      height: widget.fullScreen
+          ? null
+          : MediaQuery.of(context).size.height * 0.9,
       color: widget.fullScreen ? null : const Color(0xFFF2F2F7),
       child: content,
     );
@@ -401,11 +401,7 @@ class _PinVerifyViewState extends State<PinVerifyView> {
     });
 
     try {
-      final deviceSecret = await DeviceSecretManager.getDeviceSecretBytes();
-      final ok = await widget.appContext.verifyPin(
-        pin: utf8.encode(pin),
-        deviceSecret: deviceSecret,
-      );
+      final ok = await widget.appContext.verifyPin(pin: utf8.encode(pin));
 
       if (!mounted) return;
 
@@ -424,8 +420,9 @@ class _PinVerifyViewState extends State<PinVerifyView> {
     setState(() {
       _attemptsRemaining--;
       if (_attemptsRemaining > 0) {
-        _errorKey =
-            _attemptsRemaining == 1 ? 'pin-last-attempt' : 'pin-attempts-left';
+        _errorKey = _attemptsRemaining == 1
+            ? 'pin-last-attempt'
+            : 'pin-attempts-left';
         _errorArgs = {'attempts': _attemptsRemaining.toString()};
       }
       _isVerifying = false;

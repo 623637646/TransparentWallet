@@ -6,6 +6,8 @@ edition = "2024"
 [dependencies]
 log = { version = "0.4.28", features = ["std"] }
 thiserror = "2.0.17"
+rand = "0.10.0"
+zeroize = "1.8.2"
 strum = "0.27"
 strum_macros = "0.27"
 futures = "0.3.31"

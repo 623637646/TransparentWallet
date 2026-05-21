@@ -4,7 +4,6 @@ import 'package:janus_wallet/src/rust/api/context.dart';
 import 'package:janus_wallet/src/rust/api/app_mode.dart';
 import 'package:janus_wallet/src/rust/utils/never.dart';
 import 'package:janus_wallet/src/utils/bridge_helper.dart';
-import 'package:janus_wallet/src/utils/device_secret.dart';
 import 'package:janus_wallet/src/widgets/settings_page.dart';
 import 'common/localized_text.dart';
 import 'common/pin_input_sheet.dart';
@@ -21,7 +20,6 @@ class IntroPage extends StatefulWidget {
 class _IntroPageState extends State<IntroPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  late final Future<List<int>> _deviceSecretFuture;
 
   final List<_IntroSlide> _slides = [
     const _IntroSlide(
@@ -45,12 +43,6 @@ class _IntroPageState extends State<IntroPage> {
     ),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _deviceSecretFuture = DeviceSecretManager.getDeviceSecretBytes();
-  }
-
   void _onNext() {
     if (_currentPage < _slides.length - 1) {
       _pageController.nextPage(
@@ -71,15 +63,6 @@ class _IntroPageState extends State<IntroPage> {
     }
   }
 
-  Future<List<int>?> _getDeviceSecretOrShowError(String errorTextId) async {
-    try {
-      return await _deviceSecretFuture;
-    } catch (e) {
-      _showLocalizedSnack(errorTextId, args: {'error': e.toString()});
-      return null;
-    }
-  }
-
   Future<void> _ensurePinThenSwitchToCold() async {
     final hasPin = await _getHasPinOnce();
     if (hasPin == null) return; // Already handled error display
@@ -92,14 +75,8 @@ class _IntroPageState extends State<IntroPage> {
       );
       if (newPin == null) return;
 
-      final deviceSecret = await _getDeviceSecretOrShowError('err-pin-create');
-      if (deviceSecret == null) return;
-
       try {
-        await widget.appContext.createPin(
-          pin: utf8.encode(newPin),
-          deviceSecret: deviceSecret,
-        );
+        await widget.appContext.createPin(pin: utf8.encode(newPin));
         _showLocalizedSnack('msg-pin-created');
       } catch (error) {
         _showLocalizedSnack(

@@ -2391,6 +2391,7 @@ dependencies = [
  "fluent-templates",
  "futures",
  "log",
+ "rand 0.10.0",
  "rust_secret",
  "rx-rust",
  "sea-orm",
@@ -2398,6 +2399,7 @@ dependencies = [
  "strum_macros",
  "thiserror",
  "tokio",
+ "zeroize",
 ]
 
 [[package]]

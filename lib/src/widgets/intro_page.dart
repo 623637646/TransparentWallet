@@ -67,11 +67,16 @@ class _IntroPageState extends State<IntroPage> {
     final hasPin = await _getHasPinOnce();
     if (hasPin == null) return; // Already handled error display
 
+    if (!mounted) return;
+
     if (!hasPin) {
-      final newPin = await _promptPinTwice(
+      final newPin = await showPinInputSheet(
+        context: context,
+        appContext: widget.appContext,
         titleKey: 'pin-create-title',
-        firstSubtitleKey: 'pin-create-subtitle',
+        subtitleKey: 'pin-create-subtitle',
         confirmSubtitleKey: 'pin-create-confirm-subtitle',
+        needsConfirmation: true,
       );
       if (newPin == null) return;
 
@@ -122,44 +127,6 @@ class _IntroPageState extends State<IntroPage> {
     }
   }
 
-  Future<String?> _promptPinTwice({
-    required String titleKey,
-    required String firstSubtitleKey,
-    required String confirmSubtitleKey,
-  }) async {
-    final first = await showPinInputSheet(
-      context: context,
-      appContext: widget.appContext,
-      titleKey: titleKey,
-      subtitleKey: firstSubtitleKey,
-    );
-    if (!mounted) return null;
-    if (first == null) return null;
-    if (first.length != 6) {
-      _showLocalizedSnack('err-pin-length');
-      return null;
-    }
-
-    final confirm = await showPinInputSheet(
-      context: context,
-      appContext: widget.appContext,
-      titleKey: titleKey,
-      subtitleKey: confirmSubtitleKey,
-    );
-    if (!mounted) return null;
-    if (confirm == null) return null;
-    if (confirm.length != 6) {
-      _showLocalizedSnack('err-pin-length');
-      return null;
-    }
-
-    if (first != confirm) {
-      _showLocalizedSnack('err-pin-mismatch');
-      return null;
-    }
-
-    return first;
-  }
 
   void _showLocalizedSnack(String textId, {Map<String, String>? args}) {
     if (!mounted) return;

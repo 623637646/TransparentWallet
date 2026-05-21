@@ -133,3 +133,180 @@ where
         Ok(result)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::managers::db::DBManager;
+
+    const PIN: &[u8] = b"123456";
+    const NEW_PIN: &[u8] = b"654321";
+    const WRONG_PIN: &[u8] = b"111111";
+    const DEVICE_SECRET: &[u8] = b"device-secret";
+
+    async fn new_manager() -> PinManager<DBManager> {
+        let db = DBManager::new_memory_db()
+            .await
+            .expect("memory db should be created");
+        PinManager::new(db).await.expect("pin manager should be created")
+    }
+
+    fn assert_verify_pin(
+        manager: &PinManager<DBManager>,
+        pin: &[u8],
+        device_secret: &[u8],
+        expected: bool,
+    ) {
+        assert_eq!(
+            manager
+                .verify_pin(pin, device_secret)
+                .expect("pin verification should return a bool"),
+            expected
+        );
+    }
+
+    #[tokio::test]
+    async fn new_manager_starts_without_pin() {
+        let manager = new_manager().await;
+
+        assert!(manager.secret_context().is_none());
+        assert!(matches!(
+            manager.verify_pin(PIN, DEVICE_SECRET),
+            Err(PinError::VerifyPinWhenNoPin)
+        ));
+    }
+
+    #[tokio::test]
+    async fn create_pin_stores_secret_context_and_verifies_pin() {
+        let manager = new_manager().await;
+
+        manager
+            .create(PIN, DEVICE_SECRET)
+            .await
+            .expect("create pin should succeed");
+
+        assert!(manager.secret_context().is_some());
+        assert_verify_pin(&manager, PIN, DEVICE_SECRET, true);
+        assert_verify_pin(&manager, WRONG_PIN, DEVICE_SECRET, false);
+    }
+
+    #[tokio::test]
+    async fn create_pin_fails_when_pin_already_exists() {
+        let manager = new_manager().await;
+        manager
+            .create(PIN, DEVICE_SECRET)
+            .await
+            .expect("initial create pin should succeed");
+
+        let result = manager.create(NEW_PIN, DEVICE_SECRET).await;
+
+        assert!(matches!(
+            result,
+            Err(WalletError::PinError(PinError::CreatePinWhenHasPin))
+        ));
+        assert_verify_pin(&manager, PIN, DEVICE_SECRET, true);
+        assert_verify_pin(&manager, NEW_PIN, DEVICE_SECRET, false);
+    }
+
+    #[tokio::test]
+    async fn delete_pin_clears_secret_context() {
+        let manager = new_manager().await;
+        manager
+            .create(PIN, DEVICE_SECRET)
+            .await
+            .expect("create pin should succeed");
+
+        manager
+            .delete_pin()
+            .await
+            .expect("delete pin should succeed");
+
+        assert!(manager.secret_context().is_none());
+        assert!(matches!(
+            manager.verify_pin(PIN, DEVICE_SECRET),
+            Err(PinError::VerifyPinWhenNoPin)
+        ));
+    }
+
+    #[tokio::test]
+    async fn delete_pin_fails_when_pin_does_not_exist() {
+        let manager = new_manager().await;
+
+        let result = manager.delete_pin().await;
+
+        assert!(matches!(
+            result,
+            Err(WalletError::PinError(PinError::DeletePinWhenNoPin))
+        ));
+    }
+
+    #[tokio::test]
+    async fn update_pin_replaces_old_pin() {
+        let manager = new_manager().await;
+        manager
+            .create(PIN, DEVICE_SECRET)
+            .await
+            .expect("create pin should succeed");
+
+        manager
+            .update_pin(PIN, NEW_PIN, DEVICE_SECRET)
+            .await
+            .expect("update pin should succeed");
+
+        assert_verify_pin(&manager, PIN, DEVICE_SECRET, false);
+        assert_verify_pin(&manager, NEW_PIN, DEVICE_SECRET, true);
+    }
+
+    #[tokio::test]
+    async fn update_pin_fails_when_old_pin_is_wrong() {
+        let manager = new_manager().await;
+        manager
+            .create(PIN, DEVICE_SECRET)
+            .await
+            .expect("create pin should succeed");
+
+        let result = manager
+            .update_pin(WRONG_PIN, NEW_PIN, DEVICE_SECRET)
+            .await;
+
+        assert!(matches!(
+            result,
+            Err(WalletError::PinError(PinError::UpdatePinFailed))
+        ));
+        assert_verify_pin(&manager, PIN, DEVICE_SECRET, true);
+        assert_verify_pin(&manager, NEW_PIN, DEVICE_SECRET, false);
+    }
+
+    #[tokio::test]
+    async fn update_pin_fails_when_pin_does_not_exist() {
+        let manager = new_manager().await;
+
+        let result = manager.update_pin(PIN, NEW_PIN, DEVICE_SECRET).await;
+
+        assert!(matches!(
+            result,
+            Err(WalletError::PinError(PinError::UpdatePinWhenNoPin))
+        ));
+    }
+
+    #[tokio::test]
+    async fn pin_state_is_loaded_from_repository() {
+        let db = DBManager::new_memory_db()
+            .await
+            .expect("memory db should be created");
+        let manager = PinManager::new(db.clone())
+            .await
+            .expect("pin manager should be created");
+        manager
+            .create(PIN, DEVICE_SECRET)
+            .await
+            .expect("create pin should succeed");
+
+        let reloaded_manager = PinManager::new(db)
+            .await
+            .expect("pin manager should be reloaded");
+
+        assert!(reloaded_manager.secret_context().is_some());
+        assert_verify_pin(&reloaded_manager, PIN, DEVICE_SECRET, true);
+    }
+}

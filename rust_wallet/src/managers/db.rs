@@ -46,6 +46,15 @@ impl DBManager {
         Ok(Self(db))
     }
 
+    #[cfg(test)]
+    pub(crate) async fn new_memory_db() -> Result<Self, DBError> {
+        let db = Database::connect("sqlite::memory:").await?;
+        db.get_schema_registry(module_path!().split("::").next().unwrap())
+            .sync(&db)
+            .await?;
+        Ok(Self(db))
+    }
+
     pub(crate) fn get_connection(&self) -> DatabaseConnection {
         self.0.clone()
     }

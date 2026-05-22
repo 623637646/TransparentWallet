@@ -58,4 +58,20 @@ class SecureStorageManager {
       }
     };
   }
+
+  FutureOr<String?> Function() cleaner() {
+    return () async {
+      try {
+        await _storage.deleteAll();
+        return null;
+      } catch (error, stackTrace) {
+        logger.e(
+          'Secure storage clean failed',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        return error.toString();
+      }
+    };
+  }
 }

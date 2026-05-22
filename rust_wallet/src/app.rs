@@ -5,7 +5,9 @@ use crate::{
         db::DBManager,
         localization::manager::LocalizationManager,
         pin::manager::PinManager,
-        secure_storage::{SecureStorageManager, SecureStorageReader, SecureStorageWriter},
+        secure_storage::{
+            SecureStorageCleaner, SecureStorageManager, SecureStorageReader, SecureStorageWriter,
+        },
     },
 };
 use std::path::Path;
@@ -21,12 +23,13 @@ impl WalletApp {
         working_dir: &Path,
         writer: SecureStorageWriter,
         reader: SecureStorageReader,
+        cleaner: SecureStorageCleaner,
     ) -> Result<Self, WalletError> {
         // Data base
         let db_manager = DBManager::new(working_dir).await?;
 
         // Secure storage
-        let secure_storage_manager = SecureStorageManager::new(writer, reader);
+        let secure_storage_manager = SecureStorageManager::new(writer, reader, cleaner);
 
         // App settings
         let app_mode_manager = AppModeManager::new(db_manager.clone()).await?;

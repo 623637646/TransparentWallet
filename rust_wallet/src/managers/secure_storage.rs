@@ -8,6 +8,9 @@ pub enum SecureStorageError {
 
     #[error("Write failed: {0}")]
     WriteFailed(String),
+
+    #[error("Clean failed: {0}")]
+    CleanFailed(String),
 }
 
 pub trait SecureStorage {
@@ -21,6 +24,8 @@ pub trait SecureStorage {
         &self,
         key: String,
     ) -> impl Future<Output = Result<Option<Vec<u8>>, SecureStorageError>>;
+
+    fn clean(&self) -> impl Future<Output = Result<(), SecureStorageError>>;
 }
 
 pub type SecureStorageWriter = Box<
@@ -28,18 +33,31 @@ pub type SecureStorageWriter = Box<
         + Send
         + Sync,
 >;
+
 pub type SecureStorageReader = Box<
     dyn Fn(String) -> BoxFuture<'static, Result<Option<Vec<u8>>, SecureStorageError>> + Send + Sync,
 >;
 
+pub type SecureStorageCleaner =
+    Box<dyn Fn() -> BoxFuture<'static, Result<(), SecureStorageError>> + Send + Sync>;
+
 pub struct SecureStorageManager {
     writer: SecureStorageWriter,
     reader: SecureStorageReader,
+    cleaner: SecureStorageCleaner,
 }
 
 impl SecureStorageManager {
-    pub fn new(writer: SecureStorageWriter, reader: SecureStorageReader) -> Self {
-        Self { writer, reader }
+    pub fn new(
+        writer: SecureStorageWriter,
+        reader: SecureStorageReader,
+        cleaner: SecureStorageCleaner,
+    ) -> Self {
+        Self {
+            writer,
+            reader,
+            cleaner,
+        }
     }
 }
 
@@ -50,6 +68,10 @@ impl SecureStorage for SecureStorageManager {
 
     async fn read(&self, key: String) -> Result<Option<Vec<u8>>, SecureStorageError> {
         (self.reader)(key).await
+    }
+
+    async fn clean(&self) -> Result<(), SecureStorageError> {
+        (self.cleaner)().await
     }
 }
 
@@ -113,6 +135,11 @@ pub(crate) mod mock_secure_storage {
             } else {
                 Ok(self.data.read().unwrap().get(&key).cloned())
             }
+        }
+
+        async fn clean(&self) -> Result<(), SecureStorageError> {
+            self.data.write().unwrap().clear();
+            Ok(())
         }
     }
 }

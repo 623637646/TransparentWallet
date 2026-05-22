@@ -33,11 +33,13 @@ Future<void> main() async {
   final secureStorageManager = SecureStorageManager();
   final writer = secureStorageManager.writer();
   final reader = secureStorageManager.reader();
+  final cleaner = secureStorageManager.cleaner();
 
   final context = await initContext(
     workingDir: workingDir,
-    writer: writer,
-    reader: reader,
+    secureStorageWriter: writer,
+    secureStorageReader: reader,
+    secureStorageCleaner: cleaner,
   );
 
   // Set initial system languages

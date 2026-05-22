@@ -8,7 +8,7 @@ import 'package:janus_wallet/src/utils/secure_storage.dart';
 import 'package:janus_wallet/src/widgets/my_app.dart';
 import 'package:sqflite/sqflite.dart';
 
-Future<void> updateSystemLanguages(Context context) async {
+Future<void> _updateSystemLanguages(Context context) async {
   final systemLocales = PlatformDispatcher.instance.locales;
   final languages = systemLocales.map((locale) {
     if (locale.countryCode != null) {
@@ -43,11 +43,11 @@ Future<void> main() async {
   );
 
   // Set initial system languages
-  await updateSystemLanguages(context);
+  await _updateSystemLanguages(context);
 
   // Listen for system language changes
   PlatformDispatcher.instance.onLocaleChanged = () async {
-    await updateSystemLanguages(context);
+    await _updateSystemLanguages(context);
   };
 
   runApp(MyApp(appContext: context));

@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../rust/api/app_mode.dart';
 import '../../rust/api/context.dart';
+import '../../rust/api/pin.dart';
+import '../my_app.dart';
+import '../pin_gate.dart';
 import 'localized_text.dart';
 
 Future<String?> showPinInputSheet({
@@ -51,7 +54,6 @@ class PinInputView extends StatefulWidget {
     this.fullScreen = false,
     this.isBusy = false,
     this.errorTextKey,
-    this.resetCounter = 0,
     this.onDelete,
     this.needsConfirmation = false,
     this.confirmSubtitleKey,
@@ -71,7 +73,6 @@ class PinInputView extends StatefulWidget {
   final bool isBusy;
   final String? errorTextKey;
   final Map<String, String>? errorArgs;
-  final int resetCounter;
 
   @override
   State<PinInputView> createState() => _PinInputViewState();
@@ -83,17 +84,6 @@ class _PinInputViewState extends State<PinInputView> {
   bool _isConfirming = false;
   String? _internalErrorKey;
   static const int _pinLength = 6;
-
-  @override
-  void didUpdateWidget(covariant PinInputView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.resetCounter != widget.resetCounter) {
-      _pin = '';
-      _firstPin = '';
-      _isConfirming = false;
-      _internalErrorKey = null;
-    }
-  }
 
   void _onKeyPress(String key) {
     if (widget.isBusy) return;
@@ -392,7 +382,6 @@ class _PinVerifyViewState extends State<PinVerifyView> {
   int _resetCounter = 0;
   String? _errorKey;
   Map<String, String>? _errorArgs;
-  int _attemptsRemaining = 5;
 
   Future<void> _verifyPin(String pin) async {
     setState(() {
@@ -401,35 +390,40 @@ class _PinVerifyViewState extends State<PinVerifyView> {
     });
 
     try {
-      final ok = await widget.appContext.verifyPin(pin: utf8.encode(pin));
+      final result = await widget.appContext.verifyPin(pin: utf8.encode(pin));
 
       if (!mounted) return;
 
-      if (ok) {
-        widget.onSuccess(pin);
-      } else {
-        _handleFailedAttempt();
+      switch (result) {
+        case PinResult_Ok():
+          widget.onSuccess(pin);
+        case PinResult_Error(field0: final remainingAttempts):
+          _handleFailedAttempt(remainingAttempts);
       }
     } catch (error) {
       if (!mounted) return;
-      _handleFailedAttempt();
+      setState(() {
+        _isVerifying = false;
+        _errorKey = 'err-pin-verify';
+        _errorArgs = null;
+        _resetCounter++;
+      });
     }
   }
 
-  void _handleFailedAttempt() {
+  void _handleFailedAttempt(int remainingAttempts) {
     setState(() {
-      _attemptsRemaining--;
-      if (_attemptsRemaining > 0) {
-        _errorKey = _attemptsRemaining == 1
+      if (remainingAttempts > 0) {
+        _errorKey = remainingAttempts == 1
             ? 'pin-last-attempt'
             : 'pin-attempts-left';
-        _errorArgs = {'attempts': _attemptsRemaining.toString()};
+        _errorArgs = {'attempts': remainingAttempts.toString()};
       }
       _isVerifying = false;
       _resetCounter++;
     });
 
-    if (_attemptsRemaining == 0) {
+    if (remainingAttempts == 0) {
       _deletePinDirectly();
     }
   }
@@ -438,6 +432,17 @@ class _PinVerifyViewState extends State<PinVerifyView> {
     try {
       await widget.appContext.deletePin();
       await widget.appContext.setAppMode(appMode: AppMode.init);
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => PinGate(
+              appContext: widget.appContext,
+              child: WalletModeRouter(appContext: widget.appContext),
+            ),
+          ),
+          (route) => false,
+        );
+      }
     } catch (e) {
       // log error
     }
@@ -480,6 +485,7 @@ class _PinVerifyViewState extends State<PinVerifyView> {
   @override
   Widget build(BuildContext context) {
     final content = PinInputView(
+      key: ValueKey(_resetCounter),
       appContext: widget.appContext,
       titleKey: widget.titleKey,
       subtitleKey: widget.subtitleKey,
@@ -490,7 +496,6 @@ class _PinVerifyViewState extends State<PinVerifyView> {
       isBusy: _isVerifying,
       errorTextKey: _errorKey,
       errorArgs: _errorArgs,
-      resetCounter: _resetCounter,
       fullScreen: widget.fullScreen,
     );
 

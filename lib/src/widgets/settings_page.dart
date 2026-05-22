@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:janus_wallet/src/rust/api/app_mode.dart';
 import 'package:janus_wallet/src/rust/api/context.dart';
 import 'package:janus_wallet/src/rust/api/localization.dart';
+import 'package:janus_wallet/src/rust/api/pin.dart';
 import 'package:janus_wallet/src/rust/utils/never.dart';
 import 'package:janus_wallet/src/utils/bridge_helper.dart';
+import 'package:janus_wallet/src/widgets/my_app.dart';
+import 'package:janus_wallet/src/widgets/pin_gate.dart';
 import 'common/localized_text.dart';
 import 'common/pin_input_sheet.dart';
 
@@ -352,11 +356,35 @@ class _PinSettingItemState extends State<_PinSettingItem> {
     if (newPin == null || !mounted) return;
 
     try {
-      await widget.appContext.updatePin(
+      final result = await widget.appContext.updatePin(
         oldPin: utf8.encode(oldPin),
         newPin: utf8.encode(newPin),
       );
-      _showLocalizedError('msg-pin-updated');
+      if (!mounted) return;
+      switch (result) {
+        case PinResult_Ok():
+          _showLocalizedError('msg-pin-updated');
+        case PinResult_Error(field0: final remainingAttempts):
+          if (remainingAttempts > 0) {
+            _showLocalizedError(
+              remainingAttempts == 1 ? 'pin-last-attempt' : 'pin-attempts-left',
+              args: {'attempts': remainingAttempts.toString()},
+            );
+          } else {
+            await widget.appContext.setAppMode(appMode: AppMode.init);
+            if (mounted) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (context) => PinGate(
+                    appContext: widget.appContext,
+                    child: WalletModeRouter(appContext: widget.appContext),
+                  ),
+                ),
+                (route) => false,
+              );
+            }
+          }
+      }
     } catch (e) {
       _showLocalizedError('err-pin-update', args: {'error': e.toString()});
     }

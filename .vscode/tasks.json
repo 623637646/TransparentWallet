@@ -4,7 +4,7 @@
 		{
 			"label": "Regenerate Rust Code",
 			"type": "shell",
-			"command": "rm -rf lib/src/rust/* && rm -f rust/src/frb_generated.rs && flutter_rust_bridge_codegen generate",
+			"command": "rm -rf lib/src/rust/*(N) && rm -f rust/src/frb_generated.rs && flutter_rust_bridge_codegen generate",
 			"problemMatcher": []
 		},
 		{

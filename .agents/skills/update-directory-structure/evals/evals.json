@@ -1,0 +1,23 @@
+{
+  "skill_name": "update-directory-structure",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I just added a new Dart utility file `lib/src/utils/date_formatter.dart` for handling date logic, and I deleted the `lib/src/utils/logger.dart` file because we moved logging logic elsewhere. Please finish up and update the directory structure.",
+      "expected_output": "AGENTS.md should no longer have `logger.dart` under `lib/src/utils/`, and it should now include `date_formatter.dart` with an appropriate description.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "We created a new Rust manager under `rust_wallet/src/managers/preferences/` which includes `mod.rs`, `entities.rs`, and `manager.rs` for handling user preferences. Please wrap up the task and update the directory structure.",
+      "expected_output": "AGENTS.md should have a new section under `rust_wallet/src/managers/` for `preferences/` detailing its structure and purpose.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I modified `lib/main.dart` so it no longer sets system languages, it only initializes FRB and runs the app. Please finalize the task.",
+      "expected_output": "AGENTS.md's description for `lib/main.dart` should be updated to reflect that it no longer sets system languages.",
+      "files": []
+    }
+  ]
+}

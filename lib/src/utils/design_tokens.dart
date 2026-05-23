@@ -676,3 +676,23 @@ class ComponentTokens {
         padding: const EdgeInsets.all(64.0),
       );
 }
+
+class DesignTheme extends InheritedWidget {
+  final DesignTokens tokens;
+
+  const DesignTheme({
+    super.key,
+    required this.tokens,
+    required super.child,
+  });
+
+  static DesignTokens of(BuildContext context) {
+    final DesignTheme? result = context.dependOnInheritedWidgetOfExactType<DesignTheme>();
+    assert(result != null, 'No DesignTheme found in context');
+    return result!.tokens;
+  }
+
+  @override
+  bool updateShouldNotify(DesignTheme oldWidget) => tokens != oldWidget.tokens;
+}
+

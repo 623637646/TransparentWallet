@@ -85,6 +85,9 @@ janus_wallet/
 │       │
 │       └── widgets/                       — Add or modify files here when developing Flutter UI components.
 │           ├── my_app.dart                — Modify this file when updating the root material app configuration, routing, or global theme.
+│           ├── onboarding_screen.dart     — Modify this file when changing the horizontal onboarding slides, page indicators, or mode selection.
+│           ├── cold_wallet_home.dart      — Modify this file when changing the layout or actions of the cold wallet dashboard placeholder.
+│           ├── hot_wallet_home.dart       — Modify this file when changing the layout or actions of the hot wallet dashboard placeholder.
 │           │
 │           └── common/                    — Add new widgets here when they are meant to be reused across multiple UI modules.
 │               └── localized_text.dart    — Use this widget for all user-visible text to ensure reactive i18n rendering.

@@ -1,24 +1,9 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:janus_wallet/src/rust/api/context.dart';
 import 'package:janus_wallet/src/rust/frb_generated.dart';
 import 'package:janus_wallet/src/utils/logger.dart';
-import 'package:janus_wallet/src/utils/secure_storage.dart';
+import 'package:janus_wallet/src/utils/app_context.dart';
 import 'package:janus_wallet/src/widgets/my_app.dart';
-import 'package:sqflite/sqflite.dart';
-
-Future<void> _updateSystemLanguages(Context context) async {
-  final systemLocales = PlatformDispatcher.instance.locales;
-  final languages = systemLocales.map((locale) {
-    if (locale.countryCode != null) {
-      return '${locale.languageCode}-${locale.countryCode}';
-    } else {
-      return locale.languageCode;
-    }
-  }).toList();
-  await context.setSystemLanguages(languages: languages);
-}
 
 Future<void> main() async {
   // Init flutter_rust_bridge
@@ -27,28 +12,11 @@ Future<void> main() async {
   // Init rust logger
   initRustLogger();
 
-  // Init context
+  // Wait for Flutter Widgets to initialize
   WidgetsFlutterBinding.ensureInitialized();
-  final workingDir = await getDatabasesPath();
-  final secureStorageManager = SecureStorageManager();
-  final writer = secureStorageManager.writer();
-  final reader = secureStorageManager.reader();
-  final cleaner = secureStorageManager.cleaner();
 
-  final context = await initContext(
-    workingDir: workingDir,
-    secureStorageWriter: writer,
-    secureStorageReader: reader,
-    secureStorageCleaner: cleaner,
-  );
+  // Init app context
+  await initAppContext();
 
-  // Set initial system languages
-  await _updateSystemLanguages(context);
-
-  // Listen for system language changes
-  PlatformDispatcher.instance.onLocaleChanged = () async {
-    await _updateSystemLanguages(context);
-  };
-
-  runApp(MyApp(appContext: context));
+  runApp(MyApp());
 }

@@ -1,5 +1,5 @@
 name: janus_wallet
-description: "A new Flutter project."
+description: "A secure dual-mode (cold/hot) cryptocurrency wallet built with Flutter and Rust."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

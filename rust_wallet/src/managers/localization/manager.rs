@@ -108,10 +108,7 @@ where
         model.language = selected_language;
         self.repository
             .write::<localization::Entity>(model.clone())
-            .await
-            .inspect_err(|e| {
-                log::error!("write localization error: {}", e);
-            })?;
+            .await?;
         self.selected_language.clone().on_next(model);
         Ok(())
     }

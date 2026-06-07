@@ -1,6 +1,6 @@
 use crate::managers::{
     app_mode::{self, AppMode},
-    db::{RepositoryError, Repository},
+    db::{Repository, RepositoryError},
 };
 use rx_rust::{
     observable::{Observable, observable_ext::ObservableExt},
@@ -36,10 +36,7 @@ where
         model.app_mode = app_mode;
         self.repository
             .write::<app_mode::Entity>(model.clone())
-            .await
-            .inspect_err(|e| {
-                log::error!("write app mode error: {}", e);
-            })?;
+            .await?;
         self.app_mode.clone().on_next(model);
         Ok(())
     }

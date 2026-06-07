@@ -1,7 +1,7 @@
 use sea_orm::{
     ActiveModelTrait, ConnectOptions, Database, DatabaseConnection, EntityTrait, IntoActiveModel,
 };
-use std::path::Path;
+use std::{any::type_name_of_val, path::Path};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -77,11 +77,15 @@ impl Repository for DBManager {
     {
         let connection = self.get_connection();
         async move {
-            match T::find().one(&connection).await? {
+            match T::find().one(&connection).await.inspect_err(|e| {
+                log::error!("read from db error: {}", e);
+            })? {
                 Some(model) => Ok(model),
                 None => {
                     let default = T::Model::default().into_active_model();
-                    let default = default.insert(&connection).await?;
+                    let default = default.insert(&connection).await.inspect_err(|e| {
+                        log::error!("write to db error: {}", e);
+                    })?;
                     Ok(default)
                 }
             }
@@ -97,11 +101,14 @@ impl Repository for DBManager {
         T::Model: IntoActiveModel<T::ActiveModel>,
         T::ActiveModel: Send,
     {
+        log::debug!("write [{}] to db: {:#?}", type_name_of_val(&model), model);
         let connection = self.get_connection();
         async move {
             let active_model = model.into_active_model();
             let active_model = active_model.reset_all();
-            active_model.update(&connection).await?;
+            active_model.update(&connection).await.inspect_err(|e| {
+                log::error!("write to db error: {}", e);
+            })?;
             Ok(())
         }
     }

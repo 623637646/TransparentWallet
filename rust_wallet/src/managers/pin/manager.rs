@@ -141,18 +141,12 @@ where
         if self.secret_context().is_some() {
             return Err(PinError::CreatePinWhenHasPin.into());
         }
-        log::info!("create pin");
         let mut device_secret = self.device_secret().await?;
         let secret_context = SecretContext::new(pin, &device_secret);
         device_secret.zeroize();
         let mut model = self.model.value();
         model.secret_context_data = Some(secret_context.to_bytes());
-        self.repository
-            .write::<pin::Entity>(model.clone())
-            .await
-            .inspect_err(|e| {
-                log::error!("write pin error: {}", e);
-            })?;
+        self.repository.write::<pin::Entity>(model.clone()).await?;
         self.model.clone().on_next(model);
         Ok(())
     }
@@ -162,15 +156,9 @@ where
             return Err(PinError::DeletePinWhenNoPin.into());
         }
         self.reset_pin_failed_count().await?;
-        log::info!("delete pin");
         let mut model = self.model.value();
         model.secret_context_data = None;
-        self.repository
-            .write::<pin::Entity>(model.clone())
-            .await
-            .inspect_err(|e| {
-                log::error!("write pin error: {}", e);
-            })?;
+        self.repository.write::<pin::Entity>(model.clone()).await?;
         self.model.clone().on_next(model);
         Ok(())
     }
@@ -187,15 +175,9 @@ where
         }
         device_secret.zeroize();
         self.reset_pin_failed_count().await?;
-        log::info!("update pin");
         let mut model = self.model.value();
         model.secret_context_data = Some(secret_context.to_bytes());
-        self.repository
-            .write::<pin::Entity>(model.clone())
-            .await
-            .inspect_err(|e| {
-                log::error!("write pin error: {}", e);
-            })?;
+        self.repository.write::<pin::Entity>(model.clone()).await?;
         self.model.clone().on_next(model);
         Ok(())
     }
@@ -207,7 +189,6 @@ where
         let mut device_secret = self.device_secret().await?;
         let result = secret_context.verify_pin(pin, &device_secret);
         device_secret.zeroize();
-        log::info!("verify pin: {}", result);
         if result {
             self.reset_pin_failed_count().await?;
             Ok(())
@@ -487,4 +468,3 @@ mod tests {
         );
     }
 }
-

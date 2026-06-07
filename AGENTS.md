@@ -1,20 +1,18 @@
 # Development Guidelines
 
-If any requirements are unclear, please ask for clarification before proceeding.
-
 ## 1. Understand the Project
 
-Refer to README.md for general project information.
+Refer to [README.md](README.md) for general project information.
 
 Refer to the **Directory Structure** section in this document to understand the project's layout. Familiarize yourself with the purpose of each directory and file, and identify which modules should be reused to avoid duplication.
 
 ## 2. UI Development
 
-This section apply specifically to UI development. You may ignore this section if your task does not involve the UI.
+This section applies specifically to UI development. You may ignore this section if your task does not involve the UI.
 
 ### 2.1. Design
 
-- Refer to `DESIGN.md` for UI design specifications. Remember that your design should be in line with the **Flutter mobile** user experience. 
+When implementing UI, refer to the descriptions in [DESIGN.md](DESIGN.md) and strictly consume parameters from [design_tokens.dart](lib/src/utils/design_tokens.dart) for implementation. Hardcoding UI design parameters (such as colors, margins, padding, border radius, or typography settings) in UI components is strictly prohibited. You are allowed and expected to modify, add, or delete parameters within [design_tokens.dart](lib/src/utils/design_tokens.dart) if needed to correctly match the UI design.
 
 ### 2.2. UI Coding
 
@@ -24,8 +22,8 @@ Implement the UI strictly according to the design.
 - **Reactive Rendering**: Use `StreamBuilder` to consume the `Stream` returned by `convertSubscriptionToStream` to drive UI updates.
 - **Internationalization (i18n)**: All user-visible text must be internationalized with no hardcoded strings.
   - **References**:
-    - Widget wrapper: `lib/src/widgets/common/localized_text.dart`
-    - Locale resources: `rust_wallet/locales/`
+    - Widget wrapper: [localized_text.dart](lib/src/widgets/common/localized_text.dart)
+    - Locale resources: [rust_wallet/locales/](rust_wallet/locales/)
   - **Maintenance**: Promptly update multi-language files when adding or modifying text. Regularly clean up the locale resources by deleting invalid or obsolete translation data, and correct any problematic or inaccurate entries.
 
 ## 3. Logging
@@ -34,7 +32,7 @@ Add logging to critical business paths and error-handling blocks to ensure issue
 
 | Language | Tool |
 |----------|------|
-| Dart     | `lib/src/utils/logger.dart` |
+| Dart     | [logger.dart](lib/src/utils/logger.dart) |
 | Rust     | `log` crate |
 
 ## 4. Build
@@ -47,7 +45,8 @@ Run the local test suite and verify that all tests pass before marking a task as
 
 ## 6. Update Directory Structure
 
-Before completing a task, verify if your changes affect the **Directory Structure** section of this document. If new files or directories are added, or existing ones modified, update the documentation accordingly.
+Before completing any task that involves creating, modifying, or deleting files or directories, you MUST update the **Directory Structure** section of this document.
+To do this efficiently and accurately, use the automated `update-directory-structure` skill to incrementally update the directory structure in [AGENTS.md](AGENTS.md) before finishing. For explicit or large structural audits, you may perform a full scan.
 
 ---
 
@@ -57,11 +56,11 @@ Before completing a task, verify if your changes affect the **Directory Structur
 
 This section serves the following purposes:
 1. Provides a comprehensive and detailed overview of the directory and file structure within the following paths:
-   - `/lib`
-   - `/rust`
-   - `/rust_secret/src`
-   - `/rust_wallet/src`
-2. Outlines a one-sentence summary of when this file should be involved? Note, it's not about summarizing the function of each API inside.
+   - [/lib](lib)
+   - [/rust](rust)
+   - [/rust_secret/src](rust_secret/src)
+   - [/rust_wallet/src](rust_wallet/src)
+2. Outlines a one-sentence summary of when each file should be involved or modified, focusing on when it's changed rather than summarizing internal API functions.
 3. Ignores the following files: 
    - auto-generated files.
 

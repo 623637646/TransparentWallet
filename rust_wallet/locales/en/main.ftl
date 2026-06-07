@@ -16,5 +16,10 @@ hot-wallet-title = Hot Wallet Mode
 reset-app-mode = Reset App Mode
 cold-wallet-desc = Secure offline operation active.
 hot-wallet-desc = Online transaction mode active.
+language-selection-title = Choose Language
+language-option-system = System Language
+language-option-en = English
+language-option-zh = 简体中文
+
 
 

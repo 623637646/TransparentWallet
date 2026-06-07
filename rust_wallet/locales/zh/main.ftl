@@ -16,5 +16,10 @@ hot-wallet-title = 热钱包模式
 reset-app-mode = 重置应用模式
 cold-wallet-desc = 安全离线模式运行中。
 hot-wallet-desc = 在线交易模式运行中。
+language-selection-title = 选择语言
+language-option-system = 系统语言
+language-option-en = English
+language-option-zh = 简体中文
+
 
 

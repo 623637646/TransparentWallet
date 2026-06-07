@@ -89,6 +89,7 @@ janus_wallet/
 │           ├── hot_wallet_home.dart       — Modify this file when changing the layout or actions of the hot wallet dashboard placeholder.
 │           │
 │           └── common/                    — Add new widgets here when they are meant to be reused across multiple UI modules.
+│               ├── language_selection_bottom_sheet.dart — Use this widget to display a modal bottom sheet language chooser dialog.
 │               └── localized_text.dart    — Use this widget for all user-visible text to ensure reactive i18n rendering.
 │
 │── ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ RUST FFI BRIDGE ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─

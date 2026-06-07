@@ -1,8 +1,13 @@
 import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../rust/api/app_mode.dart';
+import '../rust/api/localization.dart';
+import '../rust/utils/never.dart';
 import '../utils/app_context.dart';
+import '../utils/bridge_helper.dart';
 import '../utils/design_tokens.dart';
+import 'common/language_selection_bottom_sheet.dart';
 import 'common/localized_text.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -16,6 +21,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   static const int _numPages = 4;
+  late final Stream<Language?> _languageStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _languageStream = convertSubscriptionToStream<Language?, BridgeNever>((onNext, onTermination) {
+      return appContext.languageStream(
+        onNext: onNext,
+        onTermination: onTermination,
+      );
+    });
+  }
 
   @override
   void dispose() {
@@ -49,6 +66,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            // Top Bar with Language Selector
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: DesignTokens.spacing.lg,
+                vertical: DesignTokens.spacing.xs,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _buildLanguageButton(context),
+                ],
+              ),
+            ),
             // Carousel Pages
             Expanded(
               child: PageView(
@@ -245,6 +275,68 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  String _getActiveLanguageName(Language? selectedLang) {
+    if (selectedLang == Language.chinese) {
+      return '简体中文';
+    } else if (selectedLang == Language.english) {
+      return 'English';
+    } else {
+      final systemLocales = PlatformDispatcher.instance.locales;
+      for (final locale in systemLocales) {
+        final code = locale.languageCode.toLowerCase();
+        if (code.startsWith('zh')) {
+          return '简体中文';
+        } else if (code.startsWith('en')) {
+          return 'English';
+        }
+      }
+      return 'English';
+    }
+  }
+
+  Widget _buildLanguageButton(BuildContext context) {
+    final tokens = DesignTheme.of(context);
+    return StreamBuilder<Language?>(
+      stream: _languageStream,
+      builder: (context, snapshot) {
+        final selectedLang = snapshot.data;
+        final activeLanguageName = _getActiveLanguageName(selectedLang);
+
+        return InkWell(
+          onTap: () => LanguageSelectionBottomSheet.show(context),
+          borderRadius: DesignTokens.rounded.pill,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14.0,
+              vertical: 8.0,
+            ),
+            decoration: BoxDecoration(
+              color: tokens.colors.surfaceChipTranslucent,
+              borderRadius: DesignTokens.rounded.pill,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.language_outlined,
+                  size: 16.0,
+                  color: tokens.colors.inkMuted80,
+                ),
+                const SizedBox(width: 6.0),
+                Text(
+                  activeLanguageName,
+                  style: DesignTokens.typography.captionStrong.copyWith(
+                    color: tokens.colors.inkMuted80,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

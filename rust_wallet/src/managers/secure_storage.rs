@@ -1,4 +1,5 @@
 use futures::future::BoxFuture;
+use std::sync::Arc;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -28,19 +29,20 @@ pub trait SecureStorage {
     fn clean(&self) -> impl Future<Output = Result<(), SecureStorageError>>;
 }
 
-pub type SecureStorageWriter = Box<
+pub type SecureStorageWriter = Arc<
     dyn Fn(String, Option<Vec<u8>>) -> BoxFuture<'static, Result<(), SecureStorageError>>
         + Send
         + Sync,
 >;
 
-pub type SecureStorageReader = Box<
+pub type SecureStorageReader = Arc<
     dyn Fn(String) -> BoxFuture<'static, Result<Option<Vec<u8>>, SecureStorageError>> + Send + Sync,
 >;
 
 pub type SecureStorageCleaner =
-    Box<dyn Fn() -> BoxFuture<'static, Result<(), SecureStorageError>> + Send + Sync>;
+    Arc<dyn Fn() -> BoxFuture<'static, Result<(), SecureStorageError>> + Send + Sync>;
 
+#[derive(Clone)]
 pub struct SecureStorageManager {
     writer: SecureStorageWriter,
     reader: SecureStorageReader,

@@ -1,7 +1,10 @@
 use sea_orm::{
     ActiveModelTrait, ConnectOptions, Database, DatabaseConnection, EntityTrait, IntoActiveModel,
 };
-use std::{any::type_name_of_val, path::Path};
+use std::{
+    any::type_name_of_val,
+    path::{Path, PathBuf},
+};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -28,10 +31,15 @@ pub trait Repository {
         T: EntityTrait,
         T::Model: IntoActiveModel<T::ActiveModel>,
         T::ActiveModel: Send;
+
+    fn reset(&self) -> impl Future<Output = Result<(), RepositoryError>> + Send + 'static;
 }
 
 #[derive(Debug, Clone)]
-pub struct DBManager(DatabaseConnection);
+pub struct DBManager {
+    connection: DatabaseConnection,
+    db_path: Option<PathBuf>,
+}
 
 impl DBManager {
     pub(crate) async fn new(working_path: &Path) -> Result<Self, RepositoryError> {
@@ -40,18 +48,21 @@ impl DBManager {
             std::fs::create_dir(working_path)?;
         }
 
-        let db_url = format!(
-            "sqlite://{}?mode=rwc",
-            working_path.join("wallet.db").to_str().unwrap()
-        );
+        let db_path = working_path.join("wallet.db");
+
+        let db_url = format!("sqlite://{}?mode=rwc", db_path.to_str().unwrap());
         let mut opt = ConnectOptions::new(db_url);
         opt.sqlx_logging(false);
 
-        let db = Database::connect(opt).await?;
-        db.get_schema_registry(module_path!().split("::").next().unwrap())
-            .sync(&db)
+        let connection = Database::connect(opt).await?;
+        connection
+            .get_schema_registry(module_path!().split("::").next().unwrap())
+            .sync(&connection)
             .await?;
-        Ok(Self(db))
+        Ok(Self {
+            connection,
+            db_path: Some(db_path),
+        })
     }
 
     #[cfg(test)]
@@ -60,11 +71,10 @@ impl DBManager {
         db.get_schema_registry(module_path!().split("::").next().unwrap())
             .sync(&db)
             .await?;
-        Ok(Self(db))
-    }
-
-    pub(crate) fn get_connection(&self) -> DatabaseConnection {
-        self.0.clone()
+        Ok(Self {
+            connection: db,
+            db_path: None,
+        })
     }
 }
 
@@ -75,7 +85,7 @@ impl Repository for DBManager {
         T::Model: IntoActiveModel<T::ActiveModel> + Default,
         T::ActiveModel: Send,
     {
-        let connection = self.get_connection();
+        let connection = self.connection.clone();
         async move {
             match T::find().one(&connection).await.inspect_err(|e| {
                 log::error!("read from db error: {}", e);
@@ -102,13 +112,32 @@ impl Repository for DBManager {
         T::ActiveModel: Send,
     {
         log::debug!("write [{}] to db: {:#?}", type_name_of_val(&model), model);
-        let connection = self.get_connection();
+        let connection = self.connection.clone();
         async move {
             let active_model = model.into_active_model();
             let active_model = active_model.reset_all();
             active_model.update(&connection).await.inspect_err(|e| {
                 log::error!("write to db error: {}", e);
             })?;
+            Ok(())
+        }
+    }
+
+    fn reset(&self) -> impl Future<Output = Result<(), RepositoryError>> + Send + 'static {
+        log::debug!("Reset Database");
+        let connection = self.connection.clone();
+        let db_path = self.db_path.clone();
+        async move {
+            // close db connection
+            connection.close().await.inspect_err(|e| {
+                log::error!("close db connection error: {}", e);
+            })?;
+            // remove db file
+            if let Some(db_path) = db_path {
+                std::fs::remove_file(db_path).inspect_err(|e| {
+                    log::error!("remove db file error: {}", e);
+                })?;
+            }
             Ok(())
         }
     }

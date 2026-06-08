@@ -23,7 +23,7 @@ pub async fn init_context(
     secure_storage_cleaner: impl Fn() -> DartFnFuture<Option<String>> + Send + Sync + 'static,
 ) -> anyhow::Result<Context> {
     let writer = Arc::new(secure_storage_writer);
-    let writer = Box::new(
+    let writer = Arc::new(
         move |key: String,
               data: Option<Vec<u8>>|
               -> BoxFuture<'static, Result<(), SecureStorageError>> {
@@ -37,7 +37,7 @@ pub async fn init_context(
         },
     );
     let reader = Arc::new(secure_storage_reader);
-    let reader = Box::new(
+    let reader = Arc::new(
         move |key: String| -> BoxFuture<'static, Result<Option<Vec<u8>>, SecureStorageError>> {
             let reader = reader.clone();
             Box::pin(async move {
@@ -49,7 +49,7 @@ pub async fn init_context(
         },
     );
     let cleaner = Arc::new(secure_storage_cleaner);
-    let cleaner = Box::new(
+    let cleaner = Arc::new(
         move || -> BoxFuture<'static, Result<(), SecureStorageError>> {
             let cleaner = cleaner.clone();
             Box::pin(async move {
@@ -73,3 +73,10 @@ pub async fn init_context(
 
 #[flutter_rust_bridge::frb(opaque)]
 pub struct Context(pub(crate) WalletApp);
+
+impl Context {
+    pub async fn reset_app(self) -> anyhow::Result<()> {
+        self.0.reset_app().await?;
+        Ok(())
+    }
+}

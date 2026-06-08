@@ -2,11 +2,12 @@ use crate::{
     error::WalletError,
     managers::{
         app_mode::manager::AppModeManager,
-        db::DBManager,
+        db::{DBManager, Repository},
         localization::manager::LocalizationManager,
         pin::manager::PinManager,
         secure_storage::{
-            SecureStorageCleaner, SecureStorageManager, SecureStorageReader, SecureStorageWriter,
+            SecureStorage, SecureStorageCleaner, SecureStorageManager, SecureStorageReader,
+            SecureStorageWriter,
         },
     },
 };
@@ -14,6 +15,8 @@ use bon::bon;
 use std::path::Path;
 
 pub struct WalletApp {
+    db_manager: DBManager,
+    secure_storage_manager: SecureStorageManager,
     pub app_mode_manager: AppModeManager<DBManager>,
     pub localization_manager: LocalizationManager<DBManager>,
     pub pin_manager: PinManager<DBManager, SecureStorageManager>,
@@ -41,12 +44,21 @@ impl WalletApp {
         let localization_manager = LocalizationManager::new(db_manager.clone()).await?;
 
         // Pin
-        let pin_manager = PinManager::new(db_manager.clone(), secure_storage_manager).await?;
+        let pin_manager =
+            PinManager::new(db_manager.clone(), secure_storage_manager.clone()).await?;
 
         Ok(Self {
+            db_manager,
+            secure_storage_manager,
             app_mode_manager,
             localization_manager,
             pin_manager,
         })
+    }
+
+    pub async fn reset_app(self) -> Result<(), WalletError> {
+        self.secure_storage_manager.clean().await?;
+        self.db_manager.reset().await?;
+        Ok(())
     }
 }

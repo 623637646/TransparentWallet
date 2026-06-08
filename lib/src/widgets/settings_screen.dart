@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../rust/api/app_mode.dart';
 import '../rust/utils/never.dart';
 import '../utils/app_context.dart';
 import '../utils/design_tokens.dart';
@@ -82,9 +81,9 @@ class SettingsScreen extends StatelessWidget {
           child: RustStreamBuilder<bool, BridgeNever>(
             subscriptionBuilder: (rustContext, onNext, onTermination) =>
                 rustContext.hasPinStream(
-              onNext: onNext,
-              onTermination: onTermination,
-            ),
+                  onNext: onNext,
+                  onTermination: onTermination,
+                ),
             initialData: false,
             builder: (context, hasPin) {
               return Column(
@@ -98,12 +97,18 @@ class SettingsScreen extends StatelessWidget {
                   SizedBox(height: DesignTokens.spacing.md),
                   _buildSettingItem(
                     context,
-                    icon: hasPin ? Icons.lock_open_outlined : Icons.lock_outline,
-                    titleKey: hasPin ? 'settings-modify-pin' : 'settings-create-pin',
+                    icon: hasPin
+                        ? Icons.lock_open_outlined
+                        : Icons.lock_outline,
+                    titleKey: hasPin
+                        ? 'settings-modify-pin'
+                        : 'settings-create-pin',
                     onTap: () {
                       PinBottomSheet.show(
                         context,
-                        mode: hasPin ? PinBottomSheetMode.modify : PinBottomSheetMode.create,
+                        mode: hasPin
+                            ? PinBottomSheetMode.modify
+                            : PinBottomSheetMode.create,
                       );
                     },
                   ),
@@ -132,10 +137,11 @@ class SettingsScreen extends StatelessWidget {
                               LocalizedText(
                                 'settings-reset-warning-title',
                                 appContext: appContext,
-                                style: DesignTokens.typography.bodyStrong.copyWith(
-                                  color: tokens.colors.ink,
-                                  fontSize: 18.0,
-                                ),
+                                style: DesignTokens.typography.bodyStrong
+                                    .copyWith(
+                                      color: tokens.colors.ink,
+                                      fontSize: 18.0,
+                                    ),
                               ),
                             ],
                           ),
@@ -152,9 +158,8 @@ class SettingsScreen extends StatelessWidget {
                               child: LocalizedText(
                                 'settings-reset-warning-cancel',
                                 appContext: appContext,
-                                style: DesignTokens.typography.buttonUtility.copyWith(
-                                  color: tokens.colors.bodyMuted,
-                                ),
+                                style: DesignTokens.typography.buttonUtility
+                                    .copyWith(color: tokens.colors.bodyMuted),
                               ),
                             ),
                             TextButton(
@@ -162,10 +167,11 @@ class SettingsScreen extends StatelessWidget {
                               child: LocalizedText(
                                 'settings-reset-warning-confirm',
                                 appContext: appContext,
-                                style: DesignTokens.typography.buttonUtility.copyWith(
-                                  color: const Color(0xFFFF385C),
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: DesignTokens.typography.buttonUtility
+                                    .copyWith(
+                                      color: const Color(0xFFFF385C),
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ),
                           ],
@@ -174,10 +180,11 @@ class SettingsScreen extends StatelessWidget {
 
                       if (confirmReset == true) {
                         try {
-                          await appContext.setAppMode(appMode: AppMode.init);
+                          await appContext.resetApp();
                           if (context.mounted) {
                             Navigator.of(context).popUntil((route) => route.isFirst);
                           }
+                          ref.invalidate(appContextProvider);
                         } catch (e) {
                           debugPrint("Failed to reset app mode: $e");
                         }

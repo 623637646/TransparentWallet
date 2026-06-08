@@ -14,13 +14,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final initialTokens = DesignTokens.of(AppMode.init);
 
-    return RustStreamBuilder<AppMode, BridgeNever>(
-      subscriptionBuilder: (rustContext, onNext, onTermination) =>
-          rustContext.appModeStream(
-        onNext: onNext,
-        onTermination: onTermination,
-      ),
-      loadingBuilder: (context) => _buildApp(
+    return contextAsync.when(
+      skipLoadingOnRefresh: false,
+      loading: () => _buildApp(
         tokens: initialTokens,
         home: Scaffold(
           backgroundColor: initialTokens.colors.canvas,
@@ -45,8 +41,40 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      builder: (context, mode) {
-        final tokens = DesignTokens.of(mode);
+      data: (rustContext) {
+        return RustStreamBuilder<AppMode, BridgeNever>(
+          subscriptionBuilder: (rustContext, onNext, onTermination) =>
+              rustContext.appModeStream(
+                onNext: onNext,
+                onTermination: onTermination,
+              ),
+          loadingBuilder: (context) => _buildApp(
+            tokens: initialTokens,
+            home: Scaffold(
+              backgroundColor: initialTokens.colors.canvas,
+              body: Center(
+                child: CircularProgressIndicator(
+                  color: initialTokens.colors.primary,
+                ),
+              ),
+            ),
+          ),
+          errorBuilder: (context, error) => _buildApp(
+            tokens: initialTokens,
+            home: Scaffold(
+              backgroundColor: initialTokens.colors.canvas,
+              body: Center(
+                child: Text(
+                  'Error: $error',
+                  style: DesignTokens.typography.body.copyWith(
+                    color: initialTokens.colors.ink,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          builder: (context, mode) {
+            final tokens = DesignTokens.of(mode);
 
         return _buildApp(
           tokens: tokens,
@@ -67,10 +95,7 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  Widget _buildApp({
-    required DesignTokens tokens,
-    required Widget home,
-  }) {
+  Widget _buildApp({required DesignTokens tokens, required Widget home}) {
     return DesignTheme(
       tokens: tokens,
       child: MaterialApp(
@@ -90,4 +115,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

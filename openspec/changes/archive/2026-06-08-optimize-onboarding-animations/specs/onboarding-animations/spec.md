@@ -1,8 +1,4 @@
-# Onboarding Animations
-
-Purpose: Defines requirements for premium, interactive looping micro-animations on illustration icons for onboarding slides.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Premium onboarding icon animations
 Selected slides of the onboarding screen SHALL feature a premium, theme-specific, looping micro-animation on its illustration icon when active.

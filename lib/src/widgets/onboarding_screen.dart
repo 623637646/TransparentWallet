@@ -361,6 +361,9 @@ class _OnboardingAnimatedIconState extends State<OnboardingAnimatedIcon>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
+  bool _hasAnimation(int index) => index == 1 || index == 2;
+
+
   @override
   void initState() {
     super.initState();
@@ -368,7 +371,7 @@ class _OnboardingAnimatedIconState extends State<OnboardingAnimatedIcon>
       vsync: this,
       duration: _getDuration(),
     );
-    if (widget.isActive) {
+    if (widget.isActive && _hasAnimation(widget.pageIndex)) {
       _controller.repeat();
     }
   }
@@ -388,7 +391,7 @@ class _OnboardingAnimatedIconState extends State<OnboardingAnimatedIcon>
   void didUpdateWidget(covariant OnboardingAnimatedIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isActive != oldWidget.isActive) {
-      if (widget.isActive) {
+      if (widget.isActive && _hasAnimation(widget.pageIndex)) {
         _controller.repeat();
       } else {
         _controller.stop();
@@ -406,6 +409,24 @@ class _OnboardingAnimatedIconState extends State<OnboardingAnimatedIcon>
   @override
   Widget build(BuildContext context) {
     final tokens = DesignTheme.of(context);
+    final staticChild = Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        color: tokens.colors.canvasParchment,
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        widget.icon,
+        size: 56,
+        color: tokens.colors.ink,
+      ),
+    );
+
+    if (!_hasAnimation(widget.pageIndex)) {
+      return staticChild;
+    }
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -430,17 +451,14 @@ class _OnboardingAnimatedIconState extends State<OnboardingAnimatedIcon>
               children: [
                 Transform.scale(
                   scale: pulseScale,
-                  child: Opacity(
-                    opacity: pulseOpacity,
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: tokens.colors.primary.withValues(alpha: 0.3),
-                          width: 2.0,
-                        ),
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: tokens.colors.primary.withValues(alpha: 0.3 * pulseOpacity),
+                        width: 2.0,
                       ),
                     ),
                   ),
@@ -452,19 +470,7 @@ class _OnboardingAnimatedIconState extends State<OnboardingAnimatedIcon>
             return child!;
         }
       },
-      child: Container(
-        width: 120,
-        height: 120,
-        decoration: BoxDecoration(
-          color: tokens.colors.canvasParchment,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          widget.icon,
-          size: 56,
-          color: tokens.colors.ink,
-        ),
-      ),
+      child: staticChild,
     );
   }
 }

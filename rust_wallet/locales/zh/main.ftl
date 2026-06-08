@@ -20,6 +20,9 @@ language-selection-title = 选择语言
 language-option-system = 系统语言
 language-option-en = English
 language-option-zh = 简体中文
+settings-title = 设置
+settings-change-language = 切换语言
+settings-reset-wallet-mode = 重置钱包模式
 
 
 

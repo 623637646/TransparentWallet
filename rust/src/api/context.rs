@@ -60,7 +60,13 @@ pub async fn init_context(
             })
         },
     );
-    let wallet_app = WalletApp::new(Path::new(&working_dir), writer, reader, cleaner).await?;
+    let wallet_app = WalletApp::builder()
+        .working_dir(Path::new(&working_dir))
+        .writer(writer)
+        .reader(reader)
+        .cleaner(cleaner)
+        .build()
+        .await?;
     let context = Context(wallet_app);
     Ok(context)
 }

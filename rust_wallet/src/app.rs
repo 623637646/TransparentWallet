@@ -10,6 +10,7 @@ use crate::{
         },
     },
 };
+use bon::bon;
 use std::path::Path;
 
 pub struct WalletApp {
@@ -18,7 +19,9 @@ pub struct WalletApp {
     pub pin_manager: PinManager<DBManager, SecureStorageManager>,
 }
 
+#[bon]
 impl WalletApp {
+    #[builder]
     pub async fn new(
         working_dir: &Path,
         writer: SecureStorageWriter,

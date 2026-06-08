@@ -23,6 +23,21 @@ language-option-zh = 简体中文
 settings-title = Settings
 settings-change-language = Change Language
 settings-reset-wallet-mode = Reset Wallet Mode
+settings-create-pin = Create PIN
+settings-modify-pin = Modify PIN
+pin-enter-old = Enter Old PIN
+pin-enter-new = Enter New PIN
+pin-confirm-new = Confirm New PIN
+pin-enter-current = Enter Current PIN
+pin-mismatch = PINs do not match
+pin-incorrect = Incorrect PIN. Remaining attempts: { $attempts }
+pin-success = PIN successfully set
+settings-reset-warning-title = Warning
+settings-reset-warning-message = Resetting the wallet will delete all local data. This action is irreversible. Are you sure you want to proceed?
+settings-reset-warning-confirm = Reset anyway
+settings-reset-warning-cancel = Cancel
+
+
 
 
 

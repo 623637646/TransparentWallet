@@ -91,7 +91,8 @@ janus_wallet/
 │           │
 │           └── common/                    — Add new widgets here when they are meant to be reused across multiple UI modules.
 │               ├── language_selection_bottom_sheet.dart — Use this widget to display a modal bottom sheet language chooser dialog.
-│               └── localized_text.dart    — Use this widget for all user-visible text to ensure reactive i18n rendering.
+│               ├── localized_text.dart    — Use this widget for all user-visible text to ensure reactive i18n rendering.
+│               └── pin_bottom_sheet.dart  — Use this widget to display a modal bottom sheet for PIN creation, modification, or verification.
 │
 │── ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ RUST FFI BRIDGE ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
 │

@@ -23,6 +23,21 @@ language-option-zh = 简体中文
 settings-title = 设置
 settings-change-language = 切换语言
 settings-reset-wallet-mode = 重置钱包模式
+settings-create-pin = 创建 PIN
+settings-modify-pin = 修改 PIN
+pin-enter-old = 请输入旧 PIN 码
+pin-enter-new = 请输入新 PIN 码
+pin-confirm-new = 请再次输入以确认
+pin-enter-current = 请输入当前 PIN 码
+pin-mismatch = 两次输入的 PIN 码不一致
+pin-incorrect = PIN 码错误。剩余尝试次数：{ $attempts }
+pin-success = PIN 码设置成功
+settings-reset-warning-title = 警告
+settings-reset-warning-message = 重置钱包将清除所有本地数据。此操作无法撤销。您确定要继续吗？
+settings-reset-warning-confirm = 确定重置
+settings-reset-warning-cancel = 取消
+
+
 
 
 

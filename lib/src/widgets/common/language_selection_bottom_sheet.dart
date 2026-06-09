@@ -4,10 +4,10 @@ import '../../rust/api/localization.dart';
 import '../../rust/utils/never.dart';
 import '../../utils/app_context.dart';
 import '../../utils/design_tokens.dart';
-import '../../utils/bridge_helper.dart';
 import 'localized_text.dart';
+import 'rust_stream_builder.dart';
 
-class LanguageSelectionBottomSheet extends StatefulWidget {
+class LanguageSelectionBottomSheet extends StatelessWidget {
   const LanguageSelectionBottomSheet({super.key});
 
   static Future<void> show(BuildContext context) {
@@ -25,27 +25,9 @@ class LanguageSelectionBottomSheet extends StatefulWidget {
     );
   }
 
-  @override
-  State<LanguageSelectionBottomSheet> createState() => _LanguageSelectionBottomSheetState();
-}
-
-class _LanguageSelectionBottomSheetState extends State<LanguageSelectionBottomSheet> {
-  late Stream<Language?> _stream;
-
-  @override
-  void initState() {
-    super.initState();
-    _stream = convertSubscriptionToStream<Language?, BridgeNever>((onNext, onTermination) {
-      return appContext.languageStream(
-        onNext: onNext,
-        onTermination: onTermination,
-      );
-    });
-  }
-
-  Future<void> _selectLanguage(Language? language) async {
+  Future<void> _selectLanguage(BuildContext context, Language? language) async {
     await appContext.setLanguage(language: language);
-    if (mounted) {
+    if (context.mounted) {
       Navigator.of(context).pop();
     }
   }
@@ -53,6 +35,34 @@ class _LanguageSelectionBottomSheetState extends State<LanguageSelectionBottomSh
   @override
   Widget build(BuildContext context) {
     final tokens = DesignTheme.of(context);
+
+    Widget buildOptionsList(Language? selectedLang) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildOption(
+            context,
+            titleKey: 'language-option-system',
+            isSelected: selectedLang == null,
+            onTap: () => _selectLanguage(context, null),
+          ),
+          Divider(color: tokens.colors.dividerSoft, height: 1.0),
+          _buildOption(
+            context,
+            titleKey: 'language-option-en',
+            isSelected: selectedLang == Language.english,
+            onTap: () => _selectLanguage(context, Language.english),
+          ),
+          Divider(color: tokens.colors.dividerSoft, height: 1.0),
+          _buildOption(
+            context,
+            titleKey: 'language-option-zh',
+            isSelected: selectedLang == Language.chinese,
+            onTap: () => _selectLanguage(context, Language.chinese),
+          ),
+        ],
+      );
+    }
 
     return SafeArea(
       child: Column(
@@ -87,41 +97,22 @@ class _LanguageSelectionBottomSheetState extends State<LanguageSelectionBottomSh
           Divider(color: tokens.colors.dividerSoft, height: 1.0),
 
           // Options StreamBuilder
-          StreamBuilder<Language?>(
-            stream: _stream,
-            builder: (context, snapshot) {
-              final selectedLang = snapshot.data;
-
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildOption(
-                    titleKey: 'language-option-system',
-                    isSelected: selectedLang == null,
-                    onTap: () => _selectLanguage(null),
-                  ),
-                  Divider(color: tokens.colors.dividerSoft, height: 1.0),
-                  _buildOption(
-                    titleKey: 'language-option-en',
-                    isSelected: selectedLang == Language.english,
-                    onTap: () => _selectLanguage(Language.english),
-                  ),
-                  Divider(color: tokens.colors.dividerSoft, height: 1.0),
-                  _buildOption(
-                    titleKey: 'language-option-zh',
-                    isSelected: selectedLang == Language.chinese,
-                    onTap: () => _selectLanguage(Language.chinese),
-                  ),
-                ],
-              );
-            },
+          RustStreamBuilder<Language?, BridgeNever>(
+            subscriptionBuilder: (rustContext, onNext, onTermination) =>
+                rustContext.languageStream(
+              onNext: onNext,
+              onTermination: onTermination,
+            ),
+            loadingBuilder: (context) => buildOptionsList(null),
+            builder: (context, selectedLang) => buildOptionsList(selectedLang),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildOption({
+  Widget _buildOption(
+    BuildContext context, {
     required String titleKey,
     required bool isSelected,
     required VoidCallback onTap,

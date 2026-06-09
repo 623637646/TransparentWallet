@@ -1,43 +1,47 @@
 import 'package:flutter/material.dart';
 import '../rust/api/app_mode.dart';
 import '../rust/utils/never.dart';
-import '../utils/app_context.dart';
-import '../utils/bridge_helper.dart';
 import '../utils/design_tokens.dart';
+import 'common/rust_stream_builder.dart';
 import 'onboarding_screen.dart';
 import 'cold_wallet_home.dart';
 import 'hot_wallet_home.dart';
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
+  Widget build(BuildContext context) {
+    final initialTokens = DesignTokens.of(AppMode.init);
 
-class _MyAppState extends State<MyApp> {
-  late Stream<AppMode> _appModeStream;
-
-  @override
-  void initState() {
-    super.initState();
-    _appModeStream = convertSubscriptionToStream<AppMode, BridgeNever>((
-      onNext,
-      onTermination,
-    ) {
-      return appContext.appModeStream(
+    return RustStreamBuilder<AppMode, BridgeNever>(
+      subscriptionBuilder: (rustContext, onNext, onTermination) =>
+          rustContext.appModeStream(
         onNext: onNext,
         onTermination: onTermination,
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<AppMode>(
-      stream: _appModeStream,
-      builder: (context, snapshot) {
-        final mode = snapshot.data ?? AppMode.init;
+      ),
+      loadingBuilder: (context) => Scaffold(
+        backgroundColor: initialTokens.colors.canvas,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: initialTokens.colors.primary,
+          ),
+        ),
+      ),
+      errorBuilder: (context, error) => Scaffold(
+        backgroundColor: initialTokens.colors.canvas,
+        body: Center(
+          child: Text(
+            'Error: $error',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 16,
+              color: initialTokens.colors.ink,
+            ),
+          ),
+        ),
+      ),
+      builder: (context, mode) {
         final tokens = DesignTokens.of(mode);
 
         return DesignTheme(
@@ -56,34 +60,6 @@ class _MyAppState extends State<MyApp> {
             ),
             home: Builder(
               builder: (context) {
-                if (snapshot.hasError) {
-                  return Scaffold(
-                    backgroundColor: tokens.colors.canvas,
-                    body: Center(
-                      child: Text(
-                        'Error: ${snapshot.error}',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 16,
-                          color: tokens.colors.ink,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-
-                if (!snapshot.hasData) {
-                  // Loading/Splash state
-                  return Scaffold(
-                    backgroundColor: tokens.colors.canvas,
-                    body: Center(
-                      child: CircularProgressIndicator(
-                        color: tokens.colors.primary,
-                      ),
-                    ),
-                  );
-                }
-
                 switch (mode) {
                   case AppMode.init:
                     return const OnboardingScreen();

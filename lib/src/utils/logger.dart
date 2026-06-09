@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:logger/logger.dart';
 import 'package:janus_wallet/src/rust/api/logger.dart';
-import 'package:janus_wallet/src/rust/utils/never.dart';
-import 'package:janus_wallet/src/utils/bridge_helper.dart';
+import 'package:janus_wallet/src/rust/utils/bridge_helper.dart';
 
 final Logger logger = Logger(
   printer: PrettyPrinter(
@@ -18,26 +17,20 @@ final Logger logger = Logger(
   ),
 );
 
-StreamSubscription<LogEntry>? _loggerSubscription;
+Future<BridgeSubscription>? _loggerSubscription;
 
 void initRustLogger() {
   assert(_loggerSubscription == null);
 
-  final stream = convertSubscriptionToStream<LogEntry, BridgeNever>(
-    (onNext, onTermination) =>
-        initLogger(onNext: onNext, onTermination: onTermination),
-  );
-
-  _loggerSubscription = stream.listen(
-    _logEntry,
-    onError: (Object error, StackTrace stackTrace) {
-      logger.e(
-        'Rust logger stream error',
-        error: error,
-        stackTrace: stackTrace,
-      );
+  _loggerSubscription = initLogger(
+    onNext: _logEntry,
+    onTermination: (error) {
+      if (error != null) {
+        logger.e('Rust logger stream error: $error');
+      } else {
+        logger.i('Rust logger stream completed');
+      }
     },
-    onDone: () => logger.i('Rust logger stream completed'),
   );
 }
 

@@ -19,7 +19,7 @@ When implementing UI, refer to the descriptions in [DESIGN.md](DESIGN.md) and st
 Implement the UI strictly according to the design.
 
 - **Component Reusability**: Pay attention to the reuse of UI components. During development, if a component might be reused by multiple modules, abstract it out and place it in an appropriate location.
-- **Reactive Rendering**: Use `StreamBuilder` to consume the `Stream` returned by `convertSubscriptionToStream` to drive UI updates.
+- **Reactive Rendering**: Use `RustStreamBuilder` to subscribe to Rust FFI streams and build UI reactively based on stream events.
 - **Internationalization (i18n)**: All user-visible text must be internationalized with no hardcoded strings.
   - **References**:
     - Widget wrapper: [localized_text.dart](lib/src/widgets/common/localized_text.dart)
@@ -77,7 +77,6 @@ janus_wallet/
 │   └── src/
 │       ├── utils/                         — Modify files here when adding or updating reusable Dart utilities.
 │       │   ├── app_context.dart           — Modify this file when changing how the global appContext, secure storage, or system languages are initialized.
-│       │   ├── bridge_helper.dart         — Import this utility whenever you need to consume Rust observable streams within a Flutter StreamBuilder.
 │       │   ├── design_tokens.dart         — Import this file when consuming global styling parameters, spacing, colors, or typography tokens.
 │       │   ├── logger.dart                — Import this file whenever you need to log messages from the Dart side.
 │       │   └── secure_storage.dart        — Modify this file when updating platform-specific secure storage options or wrappers.

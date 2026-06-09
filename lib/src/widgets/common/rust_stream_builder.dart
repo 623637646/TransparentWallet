@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:janus_wallet/src/rust/api/context.dart';
 import 'package:janus_wallet/src/rust/utils/bridge_helper.dart';
 import 'package:janus_wallet/src/utils/app_context.dart';
-import 'package:janus_wallet/src/utils/bridge_helper.dart';
 
 /// A builder signature for the Rust FFI bridge subscription.
 typedef SubscriptionBuilder<T, E extends Object> =
@@ -69,7 +68,7 @@ class _RustStreamBuilderState<T, E extends Object>
   }
 
   void _initStream() {
-    _stream = convertSubscriptionToStream<T, E>((onNext, onTermination) {
+    _stream = _convertSubscriptionToStream<T, E>((onNext, onTermination) {
       return widget.subscriptionBuilder(appContext, onNext, onTermination);
     });
   }
@@ -118,4 +117,37 @@ class _RustStreamBuilderState<T, E extends Object>
       },
     );
   }
+}
+
+/// Converts a `flutter_rust_bridge` [Future<BridgeSubscription>] into a [Stream]
+/// for reactive UI consumption.
+Stream<T> _convertSubscriptionToStream<T, E extends Object>(
+  Future<BridgeSubscription> Function(
+    FutureOr<void> Function(T) onNext,
+    FutureOr<void> Function(E?) onTermination,
+  )
+  subscriptionBuilder,
+) {
+  final controller = StreamController<T>();
+
+  Null onNext(value) {
+    if (controller.isClosed) return;
+    controller.add(value);
+  }
+
+  Null onTermination(error) {
+    if (controller.isClosed) return;
+    switch (error) {
+      case (E error):
+        controller.addError(error);
+        break;
+      case (null):
+        controller.close();
+        break;
+    }
+  }
+
+  final sub = subscriptionBuilder(onNext, onTermination);
+  controller.onCancel = () async => (await sub).dispose();
+  return controller.stream;
 }

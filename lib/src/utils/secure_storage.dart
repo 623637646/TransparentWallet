@@ -5,7 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:janus_wallet/src/utils/logger.dart';
 
 class SecureStorageManager {
-  static const _storage = FlutterSecureStorage(
+  final _storage = FlutterSecureStorage(
     iOptions: IOSOptions(
       accessibility: KeychainAccessibility.unlocked_this_device,
       accessControlFlags: [],

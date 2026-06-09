@@ -9,6 +9,7 @@ use crate::{
 use rand::Rng;
 use rust_secret::secret_context::SecretContext;
 use rx_rust::{
+    disposable::subscription::Subscription,
     observable::{Observable, observable_ext::ObservableExt},
     observer::Observer,
     subject::behavior_subject::BehaviorSubject,
@@ -44,7 +45,8 @@ const KEY_NAME_NUMBER_OF_PIN_FAILED: &str = "number_of_pin_failed";
 pub struct PinManager<R, S> {
     repository: R,
     secure_storage: S,
-    model: BehaviorSubject<'static, pin::Model, Infallible>,
+    secret_context: BehaviorSubject<'static, Option<SecretContext>, Infallible>, // None means that the user has not set a PIN yet
+    _subscription: Subscription<'static>,
 }
 
 impl<R, S> PinManager<R, S>
@@ -53,24 +55,18 @@ where
     S: SecureStorage,
 {
     pub(crate) async fn new(repository: R, secure_storage: S) -> Result<Self, RepositoryError> {
-        let model = repository.read::<pin::Entity>().await?;
-        let model = BehaviorSubject::new(model);
+        let model = repository.read_unique::<pin::Entity>().await?;
+        let secret_context = model
+            .secret_context_data
+            .map(|value| SecretContext::from_bytes(&value).expect("secret_context data is valid"));
+        let secret_context = BehaviorSubject::new(secret_context);
+        let _subscription = repository.reset_default_when_reset_notify(secret_context.clone());
         Ok(Self {
             repository,
             secure_storage,
-            model,
+            secret_context,
+            _subscription,
         })
-    }
-
-    fn secret_context(&self) -> Option<SecretContext> {
-        self.model
-            .value()
-            .secret_context_data
-            .as_ref()
-            .map(|secret_context_data| {
-                SecretContext::from_bytes(secret_context_data)
-                    .expect("secret_context data is valid")
-            })
     }
 
     async fn device_secret(&self) -> Result<Vec<u8>, SecureStorageError> {
@@ -94,6 +90,12 @@ where
                 Ok(device_secret)
             }
         }
+    }
+
+    async fn remove_device_secret(&self) -> Result<(), SecureStorageError> {
+        self.secure_storage
+            .write(KEY_NAME_DEVICE_SECRET.to_owned(), None)
+            .await
     }
 
     async fn handle_pin_failed(&self) -> Result<u8, SecureStorageError> {
@@ -132,39 +134,40 @@ where
     }
 
     pub fn has_pin(&self) -> impl Observable<'static, 'static, bool, Infallible> {
-        self.model
-            .clone()
-            .map(|model| model.secret_context_data.is_some())
+        self.secret_context.clone().map(|model| model.is_some())
     }
 
     pub async fn create(&self, pin: &[u8]) -> Result<(), WalletError> {
-        if self.secret_context().is_some() {
+        if self.secret_context.value().is_some() {
             return Err(PinError::CreatePinWhenHasPin.into());
         }
         let mut device_secret = self.device_secret().await?;
         let secret_context = SecretContext::new(pin, &device_secret);
         device_secret.zeroize();
-        let mut model = self.model.value();
+
+        let mut model = pin::Model::default();
         model.secret_context_data = Some(secret_context.to_bytes());
-        self.repository.write::<pin::Entity>(model.clone()).await?;
-        self.model.clone().on_next(model);
+        self.repository.write_unique::<pin::Entity>(model).await?;
+        self.secret_context.clone().on_next(Some(secret_context));
         Ok(())
     }
 
     pub async fn delete_pin(&self) -> Result<(), WalletError> {
-        if self.secret_context().is_none() {
+        if self.secret_context.value().is_none() {
             return Err(PinError::DeletePinWhenNoPin.into());
         }
         self.reset_pin_failed_count().await?;
-        let mut model = self.model.value();
+        self.remove_device_secret().await?;
+
+        let mut model = pin::Model::default();
         model.secret_context_data = None;
-        self.repository.write::<pin::Entity>(model.clone()).await?;
-        self.model.clone().on_next(model);
+        self.repository.write_unique::<pin::Entity>(model).await?;
+        self.secret_context.clone().on_next(None);
         Ok(())
     }
 
     pub async fn update_pin(&self, old_pin: &[u8], new_pin: &[u8]) -> Result<(), WalletError> {
-        let Some(mut secret_context) = self.secret_context() else {
+        let Some(mut secret_context) = self.secret_context.value() else {
             return Err(PinError::UpdatePinWhenNoPin.into());
         };
         let mut device_secret = self.device_secret().await?;
@@ -175,15 +178,16 @@ where
         }
         device_secret.zeroize();
         self.reset_pin_failed_count().await?;
-        let mut model = self.model.value();
+
+        let mut model = pin::Model::default();
         model.secret_context_data = Some(secret_context.to_bytes());
-        self.repository.write::<pin::Entity>(model.clone()).await?;
-        self.model.clone().on_next(model);
+        self.repository.write_unique::<pin::Entity>(model).await?;
+        self.secret_context.clone().on_next(Some(secret_context));
         Ok(())
     }
 
     pub async fn verify_pin(&self, pin: &[u8]) -> Result<(), WalletError> {
-        let Some(secret_context) = self.secret_context() else {
+        let Some(secret_context) = self.secret_context.value() else {
             return Err(PinError::VerifyPinWhenNoPin.into());
         };
         let mut device_secret = self.device_secret().await?;
@@ -217,7 +221,7 @@ mod tests {
         let secure_storage = MockSecureStorage::new();
         let manager = PinManager::new(db, secure_storage).await.unwrap();
 
-        assert!(manager.secret_context().is_none());
+        assert!(manager.secret_context.value().is_none());
         assert!(matches!(
             manager.verify_pin(PIN).await,
             Err(WalletError::PinError(PinError::VerifyPinWhenNoPin))
@@ -232,7 +236,7 @@ mod tests {
 
         manager.create(PIN).await.unwrap();
 
-        assert!(manager.secret_context().is_some());
+        assert!(manager.secret_context.value().is_some());
         assert!(manager.verify_pin(PIN).await.is_ok());
         assert!(manager.verify_pin(WRONG_PIN).await.is_err());
     }
@@ -263,7 +267,7 @@ mod tests {
 
         manager.delete_pin().await.unwrap();
 
-        assert!(manager.secret_context().is_none());
+        assert!(manager.secret_context.value().is_none());
         assert!(matches!(
             manager.verify_pin(PIN).await,
             Err(WalletError::PinError(PinError::VerifyPinWhenNoPin))
@@ -335,7 +339,7 @@ mod tests {
 
         let reloaded_manager = PinManager::new(db, secure_storage).await.unwrap();
 
-        assert!(reloaded_manager.secret_context().is_some());
+        assert!(reloaded_manager.secret_context.value().is_some());
         assert!(reloaded_manager.verify_pin(PIN).await.is_ok());
     }
 
@@ -351,7 +355,7 @@ mod tests {
                 SecureStorageError::WriteFailed(_)
             ))
         ));
-        assert!(manager.secret_context().is_none());
+        assert!(manager.secret_context.value().is_none());
     }
 
     #[tokio::test]

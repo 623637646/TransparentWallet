@@ -12,7 +12,7 @@ use crate::{
     },
 };
 use bon::bon;
-use std::path::Path;
+use std::path::PathBuf;
 
 pub struct WalletApp {
     db_manager: DBManager,
@@ -26,7 +26,7 @@ pub struct WalletApp {
 impl WalletApp {
     #[builder]
     pub async fn new(
-        working_dir: &Path,
+        working_dir: PathBuf,
         writer: SecureStorageWriter,
         reader: SecureStorageReader,
         cleaner: SecureStorageCleaner,
@@ -56,7 +56,7 @@ impl WalletApp {
         })
     }
 
-    pub async fn reset_app(self) -> Result<(), WalletError> {
+    pub async fn reset_app(&self) -> Result<(), WalletError> {
         self.secure_storage_manager.clean().await?;
         self.db_manager.reset().await?;
         Ok(())

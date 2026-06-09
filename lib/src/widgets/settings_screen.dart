@@ -177,7 +177,6 @@ class SettingsScreen extends ConsumerWidget {
                         try {
                           final appContext = ref.appContext;
                           await appContext.resetApp();
-                          ref.invalidate(appContextProvider);
                         } catch (e) {
                           debugPrint("Failed to reset app mode: $e");
                         }

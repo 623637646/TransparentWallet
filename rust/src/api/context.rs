@@ -1,6 +1,6 @@
 use flutter_rust_bridge::{DartFnFuture, PanicBacktrace};
 use rust_wallet::{app::WalletApp, managers::secure_storage::SecureStorageError};
-use std::{future::Future, path::Path, pin::Pin, sync::Arc};
+use std::{future::Future, pin::Pin, sync::Arc};
 
 #[flutter_rust_bridge::frb(init)]
 pub async fn init_rust() {
@@ -61,7 +61,7 @@ pub async fn init_context(
         },
     );
     let wallet_app = WalletApp::builder()
-        .working_dir(Path::new(&working_dir))
+        .working_dir(working_dir.into())
         .writer(writer)
         .reader(reader)
         .cleaner(cleaner)
@@ -75,7 +75,7 @@ pub async fn init_context(
 pub struct Context(pub(crate) WalletApp);
 
 impl Context {
-    pub async fn reset_app(self) -> anyhow::Result<()> {
+    pub async fn reset_app(&self) -> anyhow::Result<()> {
         self.0.reset_app().await?;
         Ok(())
     }

@@ -5,6 +5,7 @@ use crate::managers::{
 use fluent_langneg::{NegotiationStrategy, negotiate_languages};
 use fluent_templates::{Loader, static_loader};
 use rx_rust::{
+    disposable::subscription::Subscription,
     observable::{
         Observable, cloneable_boxed_observable::CloneableBoxedObservable,
         observable_ext::ObservableExt,
@@ -32,7 +33,7 @@ pub enum LocalizationError {
 pub struct LocalizationManager<R> {
     repository: R,
     // User selected language. None means use selected system language.
-    selected_language: BehaviorSubject<'static, localization::Model, Infallible>,
+    language: BehaviorSubject<'static, Option<Language>, Infallible>,
     // Languages from system settings.
     system_language: BehaviorSubject<'static, Vec<fluent_langneg::LanguageIdentifier>, Infallible>,
     // Effective language used for lookup.
@@ -43,6 +44,7 @@ pub struct LocalizationManager<R> {
         fluent_templates::LanguageIdentifier,
         Infallible,
     >,
+    _subscription: Subscription<'static>,
 }
 
 impl<R> LocalizationManager<R>
@@ -50,15 +52,14 @@ where
     R: Repository,
 {
     pub(crate) async fn new(repository: R) -> Result<Self, RepositoryError> {
-        let model = repository.read::<localization::Entity>().await?;
-        let selected_language = BehaviorSubject::new(model);
+        let model = repository.read_unique::<localization::Entity>().await?;
+        let language = BehaviorSubject::new(model.language);
 
         // Create effective language.
         let system_language = BehaviorSubject::new(Vec::new());
         let system_language_cloned = system_language.clone();
-        let effective_language = selected_language
+        let effective_language = language
             .clone()
-            .map(|model| model.language)
             .flat_map(move |language| match language {
                 Some(language) => Just::new((&language).into()).into_boxed(),
                 None => system_language_cloned
@@ -86,35 +87,35 @@ where
             .share_replay(Some(1)) // Cache the last value
             .into_cloneable_boxed();
 
+        let _subscription = repository.reset_default_when_reset_notify(language.clone());
+
         Ok(Self {
             repository,
-            selected_language,
+            language,
             system_language,
             effective_language,
+            _subscription,
         })
     }
 
-    pub fn selected_language(
+    pub fn language(
         &self,
     ) -> impl Observable<'static, 'static, Option<Language>, Infallible> + Clone {
-        self.selected_language.clone().map(|model| model.language)
+        self.language.clone()
     }
 
-    pub async fn set_selected_language(
-        &self,
-        selected_language: Option<Language>,
-    ) -> Result<(), RepositoryError> {
-        let mut model = self.selected_language.value();
-        model.language = selected_language;
+    pub async fn set_language(&self, language: Option<Language>) -> Result<(), RepositoryError> {
+        let mut model = localization::Model::default();
+        model.language = language.clone();
         self.repository
-            .write::<localization::Entity>(model.clone())
+            .write_unique::<localization::Entity>(model)
             .await?;
-        self.selected_language.clone().on_next(model);
+        self.language.clone().on_next(language);
         Ok(())
     }
 
-    pub fn set_supported_system_languages(&mut self, languages: Vec<String>) {
-        self.system_language.on_next(
+    pub fn set_supported_system_languages(&self, languages: Vec<String>) {
+        self.system_language.clone().on_next(
             languages
                 .into_iter()
                 .filter_map(|s| s.parse().ok())

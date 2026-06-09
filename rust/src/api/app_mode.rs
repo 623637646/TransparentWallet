@@ -25,7 +25,7 @@ impl Context {
         )
     }
 
-    pub async fn set_app_mode(&mut self, app_mode: AppMode) {
+    pub async fn set_app_mode(&self, app_mode: AppMode) {
         _ = self.0.app_mode_manager.set_app_mode(app_mode).await;
     }
 }

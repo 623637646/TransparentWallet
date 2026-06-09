@@ -23,7 +23,7 @@ impl Context {
             |_| {
                 self.0
                     .localization_manager
-                    .selected_language()
+                    .language()
                     .map_infallible_to_error()
             },
             on_next,
@@ -31,15 +31,11 @@ impl Context {
         )
     }
 
-    pub async fn set_language(&mut self, language: Option<Language>) {
-        let _ = self
-            .0
-            .localization_manager
-            .set_selected_language(language)
-            .await;
+    pub async fn set_language(&self, language: Option<Language>) {
+        let _ = self.0.localization_manager.set_language(language).await;
     }
 
-    pub async fn set_system_languages(&mut self, languages: Vec<String>) {
+    pub async fn set_system_languages(&self, languages: Vec<String>) {
         self.0
             .localization_manager
             .set_supported_system_languages(languages);

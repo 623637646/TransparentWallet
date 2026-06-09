@@ -6,6 +6,7 @@ import '../../rust/api/pin.dart';
 import '../../utils/app_context.dart';
 import '../../utils/design_tokens.dart';
 import 'localized_text.dart';
+import 'toast.dart';
 
 enum PinBottomSheetMode { create, modify, verify }
 
@@ -125,6 +126,7 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
               );
               if (result is PinResult_Ok) {
                 if (mounted) {
+                  Toast.show(context, 'pin-modify-success');
                   Navigator.of(context).pop(true);
                 }
               } else if (result is PinResult_Error) {
@@ -138,6 +140,7 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
             } else {
               await appContext.createPin(pin: _currentInput);
               if (mounted) {
+                Toast.show(context, 'pin-create-success');
                 Navigator.of(context).pop(true);
               }
             }
@@ -174,6 +177,7 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
           final result = await appContext.verifyPin(pin: _currentInput);
           if (result is PinResult_Ok) {
             if (mounted) {
+              Toast.show(context, 'pin-verify-success');
               Navigator.of(context).pop(true);
             }
           } else if (result is PinResult_Error) {

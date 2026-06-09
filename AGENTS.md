@@ -43,7 +43,15 @@ Ensure the project builds successfully locally. Resolve any compilation errors b
 
 Run the local test suite and verify that all tests pass before marking a task as complete.
 
-## 6. Update Directory Structure
+## 6. Code Formatting
+
+Before completing any task, you MUST format all modified source code files using the appropriate formatting tools:
+- **Dart / Flutter**: Run `dart format` on any modified Dart files.
+- **Rust**: Run `cargo fmt` within the modified Rust crate directory (e.g., [rust](rust), [rust_wallet](rust_wallet), or [rust_secret](rust_secret)).
+
+Ensure all modified code files compile successfully and do not contain any unformatted changes before finalizing the task.
+
+## 7. Update Directory Structure
 
 Before completing any task that involves creating, modifying, or deleting files or directories, you MUST update the **Directory Structure** section of this document.
 To do this efficiently and accurately, use the automated `update-directory-structure` skill to incrementally update the directory structure in [AGENTS.md](AGENTS.md) before finishing. For explicit or large structural audits, you may perform a full scan.

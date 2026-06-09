@@ -61,4 +61,3 @@ class ColdWalletHome extends StatelessWidget {
     );
   }
 }
-

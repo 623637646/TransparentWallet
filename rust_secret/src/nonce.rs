@@ -14,7 +14,7 @@ mod tests {
     fn test_generate_nonce_length() {
         let nonce: [u8; 12] = generate_nonce();
         assert_eq!(nonce.len(), 12);
-        
+
         let nonce_32: [u8; 32] = generate_nonce();
         assert_eq!(nonce_32.len(), 32);
     }

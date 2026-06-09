@@ -15,9 +15,5 @@ Future<void> main() async {
   // Wait for Flutter Widgets to initialize
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }

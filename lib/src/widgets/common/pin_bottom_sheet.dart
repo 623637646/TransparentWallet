@@ -7,11 +7,7 @@ import '../../utils/app_context.dart';
 import '../../utils/design_tokens.dart';
 import 'localized_text.dart';
 
-enum PinBottomSheetMode {
-  create,
-  modify,
-  verify,
-}
+enum PinBottomSheetMode { create, modify, verify }
 
 enum PinStep {
   createEnterNew,
@@ -23,12 +19,12 @@ enum PinStep {
 class PinBottomSheet extends ConsumerStatefulWidget {
   final PinBottomSheetMode mode;
 
-  const PinBottomSheet({
-    super.key,
-    required this.mode,
-  });
+  const PinBottomSheet({super.key, required this.mode});
 
-  static Future<bool?> show(BuildContext context, {required PinBottomSheetMode mode}) {
+  static Future<bool?> show(
+    BuildContext context, {
+    required PinBottomSheetMode mode,
+  }) {
     final tokens = DesignTheme.of(context);
     return showModalBottomSheet<bool>(
       context: context,
@@ -222,11 +218,7 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
         if (keyVal == null) {
           return const Expanded(child: SizedBox.shrink());
         }
-        return Expanded(
-          child: Center(
-            child: _buildKeyButton(keyVal),
-          ),
-        );
+        return Expanded(child: Center(child: _buildKeyButton(keyVal)));
       }).toList(),
     );
   }
@@ -250,11 +242,7 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
           onTap: isBackspace ? _onBackspace : () => _onKeyTap(keyVal as int),
           child: Center(
             child: isBackspace
-                ? Icon(
-                    keyVal,
-                    color: tokens.colors.ink,
-                    size: 24.0,
-                  )
+                ? Icon(keyVal, color: tokens.colors.ink, size: 24.0)
                 : Text(
                     keyVal.toString(),
                     style: DesignTokens.typography.lead.copyWith(
@@ -344,15 +332,15 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
                     ),
                   )
                 : (_isProcessing
-                    ? SizedBox(
-                        width: 16.0,
-                        height: 16.0,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.0,
-                          color: tokens.colors.primary,
-                        ),
-                      )
-                    : const SizedBox.shrink()),
+                      ? SizedBox(
+                          width: 16.0,
+                          height: 16.0,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            color: tokens.colors.primary,
+                          ),
+                        )
+                      : const SizedBox.shrink()),
           ),
 
           SizedBox(height: DesignTokens.spacing.md),

@@ -178,7 +178,9 @@ class SettingsScreen extends ConsumerWidget {
                           final appContext = ref.appContext;
                           await appContext.resetApp();
                           if (context.mounted) {
-                            Navigator.of(context).popUntil((route) => route.isFirst);
+                            Navigator.of(
+                              context,
+                            ).popUntil((route) => route.isFirst);
                           }
                           ref.invalidate(appContextProvider);
                         } catch (e) {

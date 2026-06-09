@@ -26,7 +26,11 @@ class LanguageSelectionBottomSheet extends ConsumerWidget {
     );
   }
 
-  Future<void> _selectLanguage(BuildContext context, WidgetRef ref, Language? language) async {
+  Future<void> _selectLanguage(
+    BuildContext context,
+    WidgetRef ref,
+    Language? language,
+  ) async {
     final appContext = ref.appContext;
     await appContext.setLanguage(language: language);
     if (context.mounted) {
@@ -101,9 +105,9 @@ class LanguageSelectionBottomSheet extends ConsumerWidget {
           RustStreamBuilder<Language?, BridgeNever>(
             subscriptionBuilder: (rustContext, onNext, onTermination) =>
                 rustContext.languageStream(
-              onNext: onNext,
-              onTermination: onTermination,
-            ),
+                  onNext: onNext,
+                  onTermination: onTermination,
+                ),
             loadingBuilder: (context) => buildOptionsList(null),
             builder: (context, selectedLang) => buildOptionsList(selectedLang),
           ),
@@ -138,11 +142,7 @@ class LanguageSelectionBottomSheet extends ConsumerWidget {
               ),
             ),
             if (isSelected)
-              Icon(
-                Icons.check,
-                color: tokens.colors.primary,
-                size: 20.0,
-              ),
+              Icon(Icons.check, color: tokens.colors.primary, size: 20.0),
           ],
         ),
       ),

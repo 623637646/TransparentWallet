@@ -64,9 +64,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  _buildLanguageButton(context),
-                ],
+                children: [_buildLanguageButton(context)],
               ),
             ),
             // Carousel Pages
@@ -120,14 +118,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     height: 124,
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
-                      transitionBuilder: (Widget child, Animation<double> animation) {
-                        return FadeTransition(
-                          opacity: animation,
-                          child: child,
-                        );
-                      },
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            );
+                          },
                       child: _currentPage < _numPages - 1
-                          ? const SizedBox.shrink(key: ValueKey('empty_actions'))
+                          ? const SizedBox.shrink(
+                              key: ValueKey('empty_actions'),
+                            )
                           : Column(
                               key: const ValueKey('mode_buttons'),
                               mainAxisSize: MainAxisSize.min,
@@ -137,9 +138,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   width: double.infinity,
                                   height: 54,
                                   child: ElevatedButton(
-                                    onPressed: () => _selectAppMode(AppMode.coldWallet),
+                                    onPressed: () =>
+                                        _selectAppMode(AppMode.coldWallet),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: btnPrimary.backgroundColor,
+                                      backgroundColor:
+                                          btnPrimary.backgroundColor,
                                       foregroundColor: btnPrimary.textColor,
                                       elevation: 0,
                                       padding: btnPrimary.padding,
@@ -149,10 +152,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                     ),
                                     child: LocalizedText(
                                       'onboarding-btn-cold',
-                                      style: DesignTokens.typography.body.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: btnPrimary.textColor,
-                                      ),
+                                      style: DesignTokens.typography.body
+                                          .copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: btnPrimary.textColor,
+                                          ),
                                     ),
                                   ),
                                 ),
@@ -162,9 +166,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   width: double.infinity,
                                   height: 54,
                                   child: OutlinedButton(
-                                    onPressed: () => _selectAppMode(AppMode.hotWallet),
+                                    onPressed: () =>
+                                        _selectAppMode(AppMode.hotWallet),
                                     style: OutlinedButton.styleFrom(
-                                      backgroundColor: btnSecondary.backgroundColor,
+                                      backgroundColor:
+                                          btnSecondary.backgroundColor,
                                       foregroundColor: btnSecondary.textColor,
                                       side: btnSecondary.border,
                                       elevation: 0,
@@ -175,10 +181,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                     ),
                                     child: LocalizedText(
                                       'onboarding-btn-hot',
-                                      style: DesignTokens.typography.body.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: btnSecondary.textColor,
-                                      ),
+                                      style: DesignTokens.typography.body
+                                          .copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: btnSecondary.textColor,
+                                          ),
                                     ),
                                   ),
                                 ),
@@ -200,8 +207,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         width: _currentPage == index ? 24.0 : 8.0,
                         decoration: BoxDecoration(
                           color: _currentPage == index
-                              ? tokens.colors.primary // active indicator
-                              : tokens.colors.surfaceChipTranslucent, // inactive indicator
+                              ? tokens
+                                    .colors
+                                    .primary // active indicator
+                              : tokens
+                                    .colors
+                                    .surfaceChipTranslucent, // inactive indicator
                           borderRadius: BorderRadius.circular(4.0),
                         ),
                       ),
@@ -292,10 +303,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         onTap: () => LanguageSelectionBottomSheet.show(context),
         borderRadius: DesignTokens.rounded.pill,
         child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 14.0,
-            vertical: 8.0,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
           decoration: BoxDecoration(
             color: tokens.colors.surfaceChipTranslucent,
             borderRadius: DesignTokens.rounded.pill,
@@ -322,11 +330,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
 
     return RustStreamBuilder<Language?, BridgeNever>(
-      subscriptionBuilder: (rustContext, onNext, onTermination) =>
-          rustContext.languageStream(
-        onNext: onNext,
-        onTermination: onTermination,
-      ),
+      subscriptionBuilder: (rustContext, onNext, onTermination) => rustContext
+          .languageStream(onNext: onNext, onTermination: onTermination),
       loadingBuilder: (context) => buildButton(null),
       builder: (context, selectedLang) => buildButton(selectedLang),
     );
@@ -355,14 +360,10 @@ class _OnboardingAnimatedIconState extends State<OnboardingAnimatedIcon>
 
   bool _hasAnimation(int index) => index == 1 || index == 2;
 
-
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: _getDuration(),
-    );
+    _controller = AnimationController(vsync: this, duration: _getDuration());
     if (widget.isActive && _hasAnimation(widget.pageIndex)) {
       _controller.repeat();
     }
@@ -408,11 +409,7 @@ class _OnboardingAnimatedIconState extends State<OnboardingAnimatedIcon>
         color: tokens.colors.canvasParchment,
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        widget.icon,
-        size: 56,
-        color: tokens.colors.ink,
-      ),
+      child: Icon(widget.icon, size: 56, color: tokens.colors.ink),
     );
 
     if (!_hasAnimation(widget.pageIndex)) {
@@ -429,10 +426,7 @@ class _OnboardingAnimatedIconState extends State<OnboardingAnimatedIcon>
             final double scale = 1.0 + math.sin(val * 4 * math.pi) * 0.03;
             return Transform.rotate(
               angle: angle,
-              child: Transform.scale(
-                scale: scale,
-                child: child,
-              ),
+              child: Transform.scale(scale: scale, child: child),
             );
           case 2: // Hot Wallet: Pulsing shield (outer ring ripples)
             final double pulseVal = val;
@@ -449,7 +443,9 @@ class _OnboardingAnimatedIconState extends State<OnboardingAnimatedIcon>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: tokens.colors.primary.withValues(alpha: 0.3 * pulseOpacity),
+                        color: tokens.colors.primary.withValues(
+                          alpha: 0.3 * pulseOpacity,
+                        ),
                         width: 2.0,
                       ),
                     ),

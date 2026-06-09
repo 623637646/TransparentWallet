@@ -61,4 +61,3 @@ class HotWalletHome extends StatelessWidget {
     );
   }
 }
-

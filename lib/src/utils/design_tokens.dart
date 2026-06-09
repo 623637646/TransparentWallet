@@ -160,7 +160,11 @@ class ColorTokens {
 class TypographyTokens {
   const TypographyTokens();
 
-  static const List<String> sfProFallback = ['system-ui', '-apple-system', 'sans-serif'];
+  static const List<String> sfProFallback = [
+    'system-ui',
+    '-apple-system',
+    'sans-serif',
+  ];
 
   final TextStyle heroDisplay = const TextStyle(
     fontFamily: 'SF Pro Display',
@@ -486,147 +490,148 @@ class ComponentTokens {
   const ComponentTokens(this.colors);
 
   ButtonStyleTokens get buttonPrimary => ButtonStyleTokens(
-        backgroundColor: colors.primary,
-        textColor: colors.onPrimary,
-        typography: DesignTokens.typography.body,
-        borderRadius: DesignTokens.rounded.pill,
-        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 22.0),
-      );
+    backgroundColor: colors.primary,
+    textColor: colors.onPrimary,
+    typography: DesignTokens.typography.body,
+    borderRadius: DesignTokens.rounded.pill,
+    padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 22.0),
+  );
 
   ButtonStyleTokens get buttonPrimaryFocus => ButtonStyleTokens(
-        backgroundColor: colors.primary,
-        textColor: colors.onPrimary,
-        typography: DesignTokens.typography.body,
-        borderRadius: DesignTokens.rounded.pill,
-        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 22.0),
-        border: BorderSide(color: colors.primaryFocus, width: 2.0),
-      );
+    backgroundColor: colors.primary,
+    textColor: colors.onPrimary,
+    typography: DesignTokens.typography.body,
+    borderRadius: DesignTokens.rounded.pill,
+    padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 22.0),
+    border: BorderSide(color: colors.primaryFocus, width: 2.0),
+  );
 
   ButtonStyleTokens get buttonPrimaryActive => ButtonStyleTokens(
-        backgroundColor: colors.primary,
-        textColor: colors.onPrimary,
-        typography: DesignTokens.typography.body,
-        borderRadius: DesignTokens.rounded.pill,
-        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 22.0),
-      );
+    backgroundColor: colors.primary,
+    textColor: colors.onPrimary,
+    typography: DesignTokens.typography.body,
+    borderRadius: DesignTokens.rounded.pill,
+    padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 22.0),
+  );
 
   ButtonStyleTokens get buttonSecondaryPill => ButtonStyleTokens(
-        backgroundColor: Colors.transparent,
-        textColor: colors.primary,
-        typography: DesignTokens.typography.body,
-        borderRadius: DesignTokens.rounded.pill,
-        padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 22.0),
-        border: BorderSide(color: colors.primary, width: 1.0),
-      );
+    backgroundColor: Colors.transparent,
+    textColor: colors.primary,
+    typography: DesignTokens.typography.body,
+    borderRadius: DesignTokens.rounded.pill,
+    padding: const EdgeInsets.symmetric(vertical: 11.0, horizontal: 22.0),
+    border: BorderSide(color: colors.primary, width: 1.0),
+  );
 
   ButtonStyleTokens get buttonDarkUtility => ButtonStyleTokens(
-        backgroundColor: colors.ink,
-        textColor: colors.onDark,
-        typography: DesignTokens.typography.buttonUtility,
-        borderRadius: DesignTokens.rounded.sm,
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
-      );
+    backgroundColor: colors.ink,
+    textColor: colors.onDark,
+    typography: DesignTokens.typography.buttonUtility,
+    borderRadius: DesignTokens.rounded.sm,
+    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
+  );
 
   ButtonStyleTokens get buttonPearlCapsule => ButtonStyleTokens(
-        backgroundColor: colors.surfacePearl,
-        textColor: colors.inkMuted80,
-        typography: DesignTokens.typography.caption,
-        borderRadius: DesignTokens.rounded.md,
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 14.0),
-        border: BorderSide(color: colors.dividerSoft, width: 3.0),
-      );
+    backgroundColor: colors.surfacePearl,
+    textColor: colors.inkMuted80,
+    typography: DesignTokens.typography.caption,
+    borderRadius: DesignTokens.rounded.md,
+    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 14.0),
+    border: BorderSide(color: colors.dividerSoft, width: 3.0),
+  );
 
   ButtonStyleTokens get buttonStoreHero => ButtonStyleTokens(
-        backgroundColor: colors.primary,
-        textColor: colors.onPrimary,
-        typography: DesignTokens.typography.buttonLarge,
-        borderRadius: DesignTokens.rounded.pill,
-        padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 28.0),
-      );
+    backgroundColor: colors.primary,
+    textColor: colors.onPrimary,
+    typography: DesignTokens.typography.buttonLarge,
+    borderRadius: DesignTokens.rounded.pill,
+    padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 28.0),
+  );
 
   ButtonStyleTokens get buttonIconCircular => ButtonStyleTokens(
-        backgroundColor: colors.surfaceChipTranslucent,
-        textColor: colors.ink,
-        typography: DesignTokens.typography.caption,
-        borderRadius: DesignTokens.rounded.full,
-        padding: EdgeInsets.zero,
-        size: 44.0,
-      );
+    backgroundColor: colors.surfaceChipTranslucent,
+    textColor: colors.ink,
+    typography: DesignTokens.typography.caption,
+    borderRadius: DesignTokens.rounded.full,
+    padding: EdgeInsets.zero,
+    size: 44.0,
+  );
 
   TextLinkTokens get textLink => TextLinkTokens(
-        backgroundColor: Colors.transparent,
-        textColor: colors.primary,
-        typography: DesignTokens.typography.body,
-      );
+    backgroundColor: Colors.transparent,
+    textColor: colors.primary,
+    typography: DesignTokens.typography.body,
+  );
 
   TextLinkTokens get textLinkOnDark => TextLinkTokens(
-        backgroundColor: Colors.transparent,
-        textColor: colors.primaryOnDark,
-        typography: DesignTokens.typography.body,
-      );
+    backgroundColor: Colors.transparent,
+    textColor: colors.primaryOnDark,
+    typography: DesignTokens.typography.body,
+  );
 
   GlobalNavTokens get globalNav => GlobalNavTokens(
-        backgroundColor: colors.surfaceBlack,
-        textColor: colors.onDark,
-        typography: DesignTokens.typography.navLink,
-        height: 44.0,
-      );
+    backgroundColor: colors.surfaceBlack,
+    textColor: colors.onDark,
+    typography: DesignTokens.typography.navLink,
+    height: 44.0,
+  );
 
   SubNavFrostedTokens get subNavFrosted => SubNavFrostedTokens(
-        backgroundColor: colors.canvasParchment.withValues(alpha: 0.80),
-        textColor: colors.ink,
-        typography: DesignTokens.typography.tagline,
-        height: 52.0,
-      );
+    backgroundColor: colors.canvasParchment.withValues(alpha: 0.80),
+    textColor: colors.ink,
+    typography: DesignTokens.typography.tagline,
+    height: 52.0,
+  );
 
   ProductTileTokens get productTileLight => ProductTileTokens(
-        backgroundColor: colors.canvas,
-        textColor: colors.ink,
-        typography: DesignTokens.typography.displayLg,
-        borderRadius: DesignTokens.rounded.none,
-        padding: const EdgeInsets.symmetric(vertical: 80.0),
-      );
+    backgroundColor: colors.canvas,
+    textColor: colors.ink,
+    typography: DesignTokens.typography.displayLg,
+    borderRadius: DesignTokens.rounded.none,
+    padding: const EdgeInsets.symmetric(vertical: 80.0),
+  );
 
   ProductTileTokens get productTileParchment => ProductTileTokens(
-        backgroundColor: colors.canvasParchment,
-        textColor: colors.ink,
-        typography: DesignTokens.typography.displayLg,
-        borderRadius: DesignTokens.rounded.none,
-        padding: const EdgeInsets.symmetric(vertical: 80.0),
-      );
+    backgroundColor: colors.canvasParchment,
+    textColor: colors.ink,
+    typography: DesignTokens.typography.displayLg,
+    borderRadius: DesignTokens.rounded.none,
+    padding: const EdgeInsets.symmetric(vertical: 80.0),
+  );
 
   ProductTileTokens get productTileDark => ProductTileTokens(
-        backgroundColor: colors.surfaceTile1,
-        textColor: colors.onDark,
-        typography: DesignTokens.typography.displayLg,
-        borderRadius: DesignTokens.rounded.none,
-        padding: const EdgeInsets.symmetric(vertical: 80.0),
-      );
+    backgroundColor: colors.surfaceTile1,
+    textColor: colors.onDark,
+    typography: DesignTokens.typography.displayLg,
+    borderRadius: DesignTokens.rounded.none,
+    padding: const EdgeInsets.symmetric(vertical: 80.0),
+  );
 
   ProductTileTokens get productTileDark2 => ProductTileTokens(
-        backgroundColor: colors.surfaceTile2,
-        textColor: colors.onDark,
-        borderRadius: DesignTokens.rounded.none,
-        padding: const EdgeInsets.symmetric(vertical: 80.0),
-      );
+    backgroundColor: colors.surfaceTile2,
+    textColor: colors.onDark,
+    borderRadius: DesignTokens.rounded.none,
+    padding: const EdgeInsets.symmetric(vertical: 80.0),
+  );
 
   ProductTileTokens get productTileDark3 => ProductTileTokens(
-        backgroundColor: colors.surfaceTile3,
-        textColor: colors.onDark,
-        borderRadius: DesignTokens.rounded.none,
-        padding: const EdgeInsets.symmetric(vertical: 80.0),
-      );
+    backgroundColor: colors.surfaceTile3,
+    textColor: colors.onDark,
+    borderRadius: DesignTokens.rounded.none,
+    padding: const EdgeInsets.symmetric(vertical: 80.0),
+  );
 
   StoreUtilityCardTokens get storeUtilityCard => StoreUtilityCardTokens(
-        backgroundColor: colors.canvas,
-        textColor: colors.ink,
-        typography: DesignTokens.typography.bodyStrong,
-        borderRadius: DesignTokens.rounded.lg,
-        padding: const EdgeInsets.all(24.0),
-        border: BorderSide(color: colors.hairline, width: 1.0),
-      );
+    backgroundColor: colors.canvas,
+    textColor: colors.ink,
+    typography: DesignTokens.typography.bodyStrong,
+    borderRadius: DesignTokens.rounded.lg,
+    padding: const EdgeInsets.all(24.0),
+    border: BorderSide(color: colors.hairline, width: 1.0),
+  );
 
-  ConfiguratorOptionChipTokens get configuratorOptionChip => ConfiguratorOptionChipTokens(
+  ConfiguratorOptionChipTokens get configuratorOptionChip =>
+      ConfiguratorOptionChipTokens(
         backgroundColor: colors.canvas,
         textColor: colors.ink,
         typography: DesignTokens.typography.caption,
@@ -634,7 +639,8 @@ class ComponentTokens {
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
       );
 
-  ConfiguratorOptionChipTokens get configuratorOptionChipSelected => ConfiguratorOptionChipTokens(
+  ConfiguratorOptionChipTokens get configuratorOptionChipSelected =>
+      ConfiguratorOptionChipTokens(
         backgroundColor: colors.canvas,
         textColor: colors.ink,
         typography: DesignTokens.typography.caption,
@@ -644,50 +650,47 @@ class ComponentTokens {
       );
 
   SearchInputTokens get searchInput => SearchInputTokens(
-        backgroundColor: colors.canvas,
-        textColor: colors.ink,
-        typography: DesignTokens.typography.body,
-        borderRadius: DesignTokens.rounded.pill,
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
-        height: 44.0,
-        border: BorderSide(color: colors.dividerSoft, width: 1.0),
-      );
+    backgroundColor: colors.canvas,
+    textColor: colors.ink,
+    typography: DesignTokens.typography.body,
+    borderRadius: DesignTokens.rounded.pill,
+    padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+    height: 44.0,
+    border: BorderSide(color: colors.dividerSoft, width: 1.0),
+  );
 
   FloatingStickyBarTokens get floatingStickyBar => FloatingStickyBarTokens(
-        backgroundColor: colors.canvasParchment.withValues(alpha: 0.80),
-        textColor: colors.ink,
-        typography: DesignTokens.typography.body,
-        height: 64.0,
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 32.0),
-      );
+    backgroundColor: colors.canvasParchment.withValues(alpha: 0.80),
+    textColor: colors.ink,
+    typography: DesignTokens.typography.body,
+    height: 64.0,
+    padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 32.0),
+  );
 
   ProductTileTokens get environmentQuoteCard => ProductTileTokens(
-        backgroundColor: colors.surfaceTile1,
-        textColor: colors.onDark,
-        typography: DesignTokens.typography.displayLg,
-        borderRadius: DesignTokens.rounded.none,
-        padding: const EdgeInsets.symmetric(vertical: 80.0),
-      );
+    backgroundColor: colors.surfaceTile1,
+    textColor: colors.onDark,
+    typography: DesignTokens.typography.displayLg,
+    borderRadius: DesignTokens.rounded.none,
+    padding: const EdgeInsets.symmetric(vertical: 80.0),
+  );
 
   FooterTokens get footer => FooterTokens(
-        backgroundColor: colors.canvasParchment,
-        textColor: colors.inkMuted80,
-        typography: DesignTokens.typography.finePrint,
-        padding: const EdgeInsets.all(64.0),
-      );
+    backgroundColor: colors.canvasParchment,
+    textColor: colors.inkMuted80,
+    typography: DesignTokens.typography.finePrint,
+    padding: const EdgeInsets.all(64.0),
+  );
 }
 
 class DesignTheme extends InheritedWidget {
   final DesignTokens tokens;
 
-  const DesignTheme({
-    super.key,
-    required this.tokens,
-    required super.child,
-  });
+  const DesignTheme({super.key, required this.tokens, required super.child});
 
   static DesignTokens of(BuildContext context) {
-    final DesignTheme? result = context.dependOnInheritedWidgetOfExactType<DesignTheme>();
+    final DesignTheme? result = context
+        .dependOnInheritedWidgetOfExactType<DesignTheme>();
     assert(result != null, 'No DesignTheme found in context');
     return result!.tokens;
   }
@@ -695,4 +698,3 @@ class DesignTheme extends InheritedWidget {
   @override
   bool updateShouldNotify(DesignTheme oldWidget) => tokens != oldWidget.tokens;
 }
-

@@ -2,7 +2,7 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Regenerate Rust Code",
+			"label": "Regenerate flutter_rust_bridge Code",
 			"type": "shell",
 			"command": "rm -rf lib/src/rust/*(N) && rm -f rust/src/frb_generated.rs && flutter_rust_bridge_codegen generate",
 			"problemMatcher": []

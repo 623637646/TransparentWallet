@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../rust/api/app_mode.dart';
 import '../rust/api/localization.dart';
 import '../rust/utils/never.dart';
@@ -10,14 +11,14 @@ import 'common/language_selection_bottom_sheet.dart';
 import 'common/localized_text.dart';
 import 'common/rust_stream_builder.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   static const int _numPages = 4;
@@ -36,6 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _selectAppMode(AppMode mode) async {
     try {
+      final appContext = ref.appContext;
       await appContext.setAppMode(appMode: mode);
     } catch (e) {
       // In production we would log this using the Logger utility
@@ -147,7 +149,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     ),
                                     child: LocalizedText(
                                       'onboarding-btn-cold',
-                                      appContext: appContext,
                                       style: DesignTokens.typography.body.copyWith(
                                         fontWeight: FontWeight.w600,
                                         color: btnPrimary.textColor,
@@ -174,7 +175,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     ),
                                     child: LocalizedText(
                                       'onboarding-btn-hot',
-                                      appContext: appContext,
                                       style: DesignTokens.typography.body.copyWith(
                                         fontWeight: FontWeight.w600,
                                         color: btnSecondary.textColor,
@@ -242,7 +242,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               // Title Header
               LocalizedText(
                 titleKey,
-                appContext: appContext,
                 textAlign: TextAlign.center,
                 style: DesignTokens.typography.lead.copyWith(
                   color: tokens.colors.ink,
@@ -253,7 +252,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               // Description Body
               LocalizedText(
                 bodyKey,
-                appContext: appContext,
                 textAlign: TextAlign.center,
                 style: DesignTokens.typography.body.copyWith(
                   color: tokens.colors.bodyMuted,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../utils/app_context.dart';
 import '../utils/design_tokens.dart';
 import 'common/localized_text.dart';
 import 'settings_screen.dart';
@@ -42,7 +41,6 @@ class HotWalletHome extends StatelessWidget {
                 SizedBox(height: DesignTokens.spacing.lg),
                 LocalizedText(
                   'hot-wallet-title',
-                  appContext: appContext,
                   style: DesignTokens.typography.displayMd.copyWith(
                     color: tokens.colors.ink,
                   ),
@@ -50,7 +48,6 @@ class HotWalletHome extends StatelessWidget {
                 SizedBox(height: DesignTokens.spacing.sm),
                 LocalizedText(
                   'hot-wallet-desc',
-                  appContext: appContext,
                   textAlign: TextAlign.center,
                   style: DesignTokens.typography.body.copyWith(
                     color: tokens.colors.bodyMuted,

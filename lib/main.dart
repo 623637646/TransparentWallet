@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:janus_wallet/src/rust/frb_generated.dart';
 import 'package:janus_wallet/src/utils/logger.dart';
-import 'package:janus_wallet/src/utils/app_context.dart';
 import 'package:janus_wallet/src/widgets/my_app.dart';
 
 Future<void> main() async {
@@ -15,8 +15,9 @@ Future<void> main() async {
   // Wait for Flutter Widgets to initialize
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Init app context
-  await initAppContext();
-
-  runApp(MyApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:janus_wallet/src/rust/api/context.dart';
 import 'package:janus_wallet/src/rust/utils/bridge_helper.dart';
 import 'package:janus_wallet/src/utils/app_context.dart';
@@ -18,7 +19,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T data);
 
 /// A common widget that simplifies subscribing to Rust FFI observable streams
 /// and reactively rendering child widgets as the stream data changes.
-class RustStreamBuilder<T, E extends Object> extends StatefulWidget {
+class RustStreamBuilder<T, E extends Object> extends ConsumerStatefulWidget {
   /// The builder function that invokes the Rust subscription API.
   final SubscriptionBuilder<T, E> subscriptionBuilder;
 
@@ -53,12 +54,12 @@ class RustStreamBuilder<T, E extends Object> extends StatefulWidget {
   });
 
   @override
-  State<RustStreamBuilder<T, E>> createState() =>
+  ConsumerState<RustStreamBuilder<T, E>> createState() =>
       _RustStreamBuilderState<T, E>();
 }
 
 class _RustStreamBuilderState<T, E extends Object>
-    extends State<RustStreamBuilder<T, E>> {
+    extends ConsumerState<RustStreamBuilder<T, E>> {
   late Stream<T> _stream;
 
   @override
@@ -68,8 +69,9 @@ class _RustStreamBuilderState<T, E extends Object>
   }
 
   void _initStream() {
+    final context = ref.appContext;
     _stream = _convertSubscriptionToStream<T, E>((onNext, onTermination) {
-      return widget.subscriptionBuilder(appContext, onNext, onTermination);
+      return widget.subscriptionBuilder(context, onNext, onTermination);
     });
   }
 

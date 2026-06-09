@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../rust/api/localization.dart';
 import '../../rust/utils/never.dart';
 import '../../utils/app_context.dart';
@@ -7,7 +8,7 @@ import '../../utils/design_tokens.dart';
 import 'localized_text.dart';
 import 'rust_stream_builder.dart';
 
-class LanguageSelectionBottomSheet extends StatelessWidget {
+class LanguageSelectionBottomSheet extends ConsumerWidget {
   const LanguageSelectionBottomSheet({super.key});
 
   static Future<void> show(BuildContext context) {
@@ -25,7 +26,8 @@ class LanguageSelectionBottomSheet extends StatelessWidget {
     );
   }
 
-  Future<void> _selectLanguage(BuildContext context, Language? language) async {
+  Future<void> _selectLanguage(BuildContext context, WidgetRef ref, Language? language) async {
+    final appContext = ref.appContext;
     await appContext.setLanguage(language: language);
     if (context.mounted) {
       Navigator.of(context).pop();
@@ -33,7 +35,7 @@ class LanguageSelectionBottomSheet extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tokens = DesignTheme.of(context);
 
     Widget buildOptionsList(Language? selectedLang) {
@@ -44,21 +46,21 @@ class LanguageSelectionBottomSheet extends StatelessWidget {
             context,
             titleKey: 'language-option-system',
             isSelected: selectedLang == null,
-            onTap: () => _selectLanguage(context, null),
+            onTap: () => _selectLanguage(context, ref, null),
           ),
           Divider(color: tokens.colors.dividerSoft, height: 1.0),
           _buildOption(
             context,
             titleKey: 'language-option-en',
             isSelected: selectedLang == Language.english,
-            onTap: () => _selectLanguage(context, Language.english),
+            onTap: () => _selectLanguage(context, ref, Language.english),
           ),
           Divider(color: tokens.colors.dividerSoft, height: 1.0),
           _buildOption(
             context,
             titleKey: 'language-option-zh',
             isSelected: selectedLang == Language.chinese,
-            onTap: () => _selectLanguage(context, Language.chinese),
+            onTap: () => _selectLanguage(context, ref, Language.chinese),
           ),
         ],
       );
@@ -87,7 +89,6 @@ class LanguageSelectionBottomSheet extends StatelessWidget {
             ),
             child: LocalizedText(
               'language-selection-title',
-              appContext: appContext,
               style: DesignTokens.typography.bodyStrong.copyWith(
                 color: tokens.colors.ink,
               ),
@@ -131,7 +132,6 @@ class LanguageSelectionBottomSheet extends StatelessWidget {
           children: [
             LocalizedText(
               titleKey,
-              appContext: appContext,
               style: DesignTokens.typography.body.copyWith(
                 color: isSelected ? tokens.colors.primary : tokens.colors.ink,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,

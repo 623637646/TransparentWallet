@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../rust/api/pin.dart';
 import '../../utils/app_context.dart';
 import '../../utils/design_tokens.dart';
@@ -19,7 +20,7 @@ enum PinStep {
   verifyEnterCurrent,
 }
 
-class PinBottomSheet extends StatefulWidget {
+class PinBottomSheet extends ConsumerStatefulWidget {
   final PinBottomSheetMode mode;
 
   const PinBottomSheet({
@@ -49,10 +50,10 @@ class PinBottomSheet extends StatefulWidget {
   }
 
   @override
-  State<PinBottomSheet> createState() => _PinBottomSheetState();
+  ConsumerState<PinBottomSheet> createState() => _PinBottomSheetState();
 }
 
-class _PinBottomSheetState extends State<PinBottomSheet> {
+class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
   late PinStep _step;
   final List<int> _firstPin = [];
   final List<int> _oldPin = [];
@@ -120,6 +121,7 @@ class _PinBottomSheetState extends State<PinBottomSheet> {
 
         case PinStep.createConfirmNew:
           if (const ListEquality<int>().equals(_firstPin, _currentInput)) {
+            final appContext = ref.appContext;
             if (widget.mode == PinBottomSheetMode.modify) {
               final result = await appContext.updatePin(
                 oldPin: _oldPin,
@@ -153,6 +155,7 @@ class _PinBottomSheetState extends State<PinBottomSheet> {
           break;
 
         case PinStep.modifyEnterOld:
+          final appContext = ref.appContext;
           final result = await appContext.verifyPin(pin: _currentInput);
           if (result is PinResult_Ok) {
             _oldPin.clear();
@@ -171,6 +174,7 @@ class _PinBottomSheetState extends State<PinBottomSheet> {
           break;
 
         case PinStep.verifyEnterCurrent:
+          final appContext = ref.appContext;
           final result = await appContext.verifyPin(pin: _currentInput);
           if (result is PinResult_Ok) {
             if (mounted) {
@@ -314,7 +318,6 @@ class _PinBottomSheetState extends State<PinBottomSheet> {
             padding: EdgeInsets.symmetric(horizontal: DesignTokens.spacing.lg),
             child: LocalizedText(
               _getPromptKey(),
-              appContext: appContext,
               style: DesignTokens.typography.bodyStrong.copyWith(
                 color: tokens.colors.ink,
               ),
@@ -334,7 +337,6 @@ class _PinBottomSheetState extends State<PinBottomSheet> {
             child: _errorMessage != null
                 ? LocalizedText(
                     _errorMessage!,
-                    appContext: appContext,
                     args: _errorArgs,
                     style: DesignTokens.typography.caption.copyWith(
                       color: const Color(0xFFFF385C),

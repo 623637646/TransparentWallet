@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../rust/utils/never.dart';
 import '../utils/app_context.dart';
 import '../utils/design_tokens.dart';
@@ -7,7 +8,7 @@ import 'common/localized_text.dart';
 import 'common/pin_bottom_sheet.dart';
 import 'common/rust_stream_builder.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
   Widget _buildSettingItem(
     BuildContext context, {
@@ -32,7 +33,6 @@ class SettingsScreen extends StatelessWidget {
             Expanded(
               child: LocalizedText(
                 titleKey,
-                appContext: appContext,
                 style: DesignTokens.typography.body.copyWith(
                   color: tokens.colors.ink,
                   fontWeight: FontWeight.w500,
@@ -51,7 +51,7 @@ class SettingsScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tokens = DesignTheme.of(context);
 
     return Scaffold(
@@ -65,7 +65,6 @@ class SettingsScreen extends StatelessWidget {
         ),
         title: LocalizedText(
           'settings-title',
-          appContext: appContext,
           style: DesignTokens.typography.bodyStrong.copyWith(
             color: tokens.colors.ink,
           ),
@@ -136,7 +135,6 @@ class SettingsScreen extends StatelessWidget {
                               const SizedBox(width: 8.0),
                               LocalizedText(
                                 'settings-reset-warning-title',
-                                appContext: appContext,
                                 style: DesignTokens.typography.bodyStrong
                                     .copyWith(
                                       color: tokens.colors.ink,
@@ -147,7 +145,6 @@ class SettingsScreen extends StatelessWidget {
                           ),
                           content: LocalizedText(
                             'settings-reset-warning-message',
-                            appContext: appContext,
                             style: DesignTokens.typography.body.copyWith(
                               color: tokens.colors.ink,
                             ),
@@ -157,7 +154,6 @@ class SettingsScreen extends StatelessWidget {
                               onPressed: () => Navigator.of(context).pop(false),
                               child: LocalizedText(
                                 'settings-reset-warning-cancel',
-                                appContext: appContext,
                                 style: DesignTokens.typography.buttonUtility
                                     .copyWith(color: tokens.colors.bodyMuted),
                               ),
@@ -166,7 +162,6 @@ class SettingsScreen extends StatelessWidget {
                               onPressed: () => Navigator.of(context).pop(true),
                               child: LocalizedText(
                                 'settings-reset-warning-confirm',
-                                appContext: appContext,
                                 style: DesignTokens.typography.buttonUtility
                                     .copyWith(
                                       color: const Color(0xFFFF385C),
@@ -180,6 +175,7 @@ class SettingsScreen extends StatelessWidget {
 
                       if (confirmReset == true) {
                         try {
+                          final appContext = ref.appContext;
                           await appContext.resetApp();
                           if (context.mounted) {
                             Navigator.of(context).popUntil((route) => route.isFirst);

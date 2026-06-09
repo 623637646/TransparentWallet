@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../rust/api/context.dart';
 import 'rust_stream_builder.dart';
 
 class LocalizedText extends StatelessWidget {
   final String textId;
-  final Context appContext;
   final TextStyle? style;
   final TextAlign? textAlign;
   final Map<String, String>? args;
@@ -12,7 +10,6 @@ class LocalizedText extends StatelessWidget {
   const LocalizedText(
     this.textId, {
     super.key,
-    required this.appContext,
     this.style,
     this.textAlign,
     this.args,

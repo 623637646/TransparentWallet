@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:janus_wallet/src/rust/api/context.dart';
 import 'package:janus_wallet/src/utils/secure_storage.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/foundation.dart';
 
-/// Global application context instance providing interfaces to interact with the Rust core.
-late Context appContext;
+/// FutureProvider that asynchronously initializes the application context.
+final appContextProvider = FutureProvider<Context>((ref) async {
+  return initAppContext();
+});
 
 /// Initializes the application context.
 ///
@@ -14,14 +17,16 @@ late Context appContext;
 /// 2. Initializes the secure storage manager and its read/write/clean closures.
 /// 3. Initializes the Rust core `Context` via FFI with the above dependencies.
 /// 4. Synchronizes and listens to system language changes for i18n support.
-Future<void> initAppContext() async {
+///
+/// Returns the initialized [Context] instance.
+Future<Context> initAppContext() async {
   final workingDir = await getDatabasesPath();
   final secureStorageManager = SecureStorageManager();
   final writer = secureStorageManager.writer();
   final reader = secureStorageManager.reader();
   final cleaner = secureStorageManager.cleaner();
 
-  appContext = await initContext(
+  final context = await initContext(
     workingDir: workingDir,
     secureStorageWriter: writer,
     secureStorageReader: reader,
@@ -29,12 +34,14 @@ Future<void> initAppContext() async {
   );
 
   // Set initial system languages
-  await _updateSystemLanguages(appContext);
+  await _updateSystemLanguages(context);
 
   // Listen for system language changes
   PlatformDispatcher.instance.onLocaleChanged = () async {
-    await _updateSystemLanguages(appContext);
+    await _updateSystemLanguages(context);
   };
+
+  return context;
 }
 
 /// Updates the system languages in the Rust context.
@@ -52,4 +59,10 @@ Future<void> _updateSystemLanguages(Context context) async {
     }
   }).toList();
   await context.setSystemLanguages(languages: languages);
+}
+
+/// Extension on [WidgetRef] to allow convenient, synchronous access to the initialized [Context].
+extension AppContextRef on WidgetRef {
+  /// Retrieves the initialized Rust core FFI [Context] synchronously.
+  Context get appContext => read(appContextProvider).requireValue;
 }

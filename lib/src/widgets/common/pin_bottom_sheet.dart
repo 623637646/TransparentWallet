@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import '../../rust/api/pin.dart';
 import '../../utils/app_context.dart';
@@ -101,14 +102,6 @@ class _PinBottomSheetState extends State<PinBottomSheet> {
     }
   }
 
-  bool _listEquals(List<int> a, List<int> b) {
-    if (a.length != b.length) return false;
-    for (int i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
-
   Future<void> _onSubmit() async {
     setState(() {
       _isProcessing = true;
@@ -126,7 +119,7 @@ class _PinBottomSheetState extends State<PinBottomSheet> {
           break;
 
         case PinStep.createConfirmNew:
-          if (_listEquals(_firstPin, _currentInput)) {
+          if (const ListEquality<int>().equals(_firstPin, _currentInput)) {
             if (widget.mode == PinBottomSheetMode.modify) {
               final result = await appContext.updatePin(
                 oldPin: _oldPin,

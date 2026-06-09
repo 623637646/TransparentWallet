@@ -177,11 +177,6 @@ class SettingsScreen extends ConsumerWidget {
                         try {
                           final appContext = ref.appContext;
                           await appContext.resetApp();
-                          if (context.mounted) {
-                            Navigator.of(
-                              context,
-                            ).popUntil((route) => route.isFirst);
-                          }
                           ref.invalidate(appContextProvider);
                         } catch (e) {
                           debugPrint("Failed to reset app mode: $e");

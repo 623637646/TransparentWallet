@@ -45,9 +45,10 @@ impl Context {
             .set_supported_system_languages(languages);
     }
 
-    pub async fn lookup_local(
+    pub async fn look_up_text(
         &self,
         text_id: String,
+        args: Option<HashMap<String, String>>,
         on_next: impl Fn(String) -> DartFnFuture<()> + Send + Sync + 'static,
         on_termination: impl Fn(Option<String>) -> DartFnFuture<()> + Send + Sync + 'static,
     ) -> BridgeSubscription {
@@ -55,26 +56,7 @@ impl Context {
             |_| {
                 self.0
                     .localization_manager
-                    .lookup(text_id)
-                    .catch(|error| Throw::new(error.to_string()).map_infallible_to_value())
-            },
-            on_next,
-            on_termination,
-        )
-    }
-
-    pub async fn lookup_local_with_args(
-        &self,
-        text_id: String,
-        args: HashMap<String, String>,
-        on_next: impl Fn(String) -> DartFnFuture<()> + Send + Sync + 'static,
-        on_termination: impl Fn(Option<String>) -> DartFnFuture<()> + Send + Sync + 'static,
-    ) -> BridgeSubscription {
-        subscribe_with_bridge_callback(
-            |_| {
-                self.0
-                    .localization_manager
-                    .lookup_with_args(text_id, args)
+                    .lookup(text_id, args)
                     .catch(|error| Throw::new(error.to_string()).map_infallible_to_value())
             },
             on_next,

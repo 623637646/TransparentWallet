@@ -125,21 +125,6 @@ where
     pub fn lookup(
         &self,
         text_id: String,
-    ) -> impl Observable<'static, 'static, String, LocalizationError> {
-        self.lookup_impl(text_id, None)
-    }
-
-    pub fn lookup_with_args(
-        &self,
-        text_id: String,
-        args: HashMap<String, String>,
-    ) -> impl Observable<'static, 'static, String, LocalizationError> {
-        self.lookup_impl(text_id, Some(args))
-    }
-
-    fn lookup_impl(
-        &self,
-        text_id: String,
         args: Option<HashMap<String, String>>,
     ) -> impl Observable<'static, 'static, String, LocalizationError> {
         self.effective_language

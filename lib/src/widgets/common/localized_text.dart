@@ -24,20 +24,12 @@ class LocalizedText extends StatelessWidget {
       keys: [textId, args],
       initialData: '',
       subscriptionBuilder: (rustContext, onNext, onTermination) {
-        if (args != null) {
-          return rustContext.lookupLocalWithArgs(
-            textId: textId,
-            args: args!,
-            onNext: onNext,
-            onTermination: onTermination,
-          );
-        } else {
-          return rustContext.lookupLocal(
-            textId: textId,
-            onNext: onNext,
-            onTermination: onTermination,
-          );
-        }
+        return rustContext.lookUpText(
+          textId: textId,
+          args: args,
+          onNext: onNext,
+          onTermination: onTermination,
+        );
       },
       builder: (context, text) {
         return Text(text, style: style, textAlign: textAlign);

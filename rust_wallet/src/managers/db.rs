@@ -16,6 +16,7 @@ use std::{
     sync::Arc,
 };
 use thiserror::Error;
+use tokio::sync::RwLock;
 
 #[derive(Error, Debug)]
 pub enum RepositoryError {
@@ -68,7 +69,7 @@ pub trait Repository {
 
 #[derive(Clone)]
 pub struct DBManager {
-    connection: Arc<tokio::sync::RwLock<DatabaseConnection>>,
+    connection: Arc<RwLock<DatabaseConnection>>,
     working_path: Option<PathBuf>,
     reset_notify: PublishSubject<'static, (), Infallible>,
 }
@@ -79,7 +80,7 @@ impl DBManager {
     pub(crate) async fn new(working_path: PathBuf) -> Result<Self, RepositoryError> {
         let connection = DBManager::connect_db(Some(&working_path)).await?;
         Ok(Self {
-            connection: Arc::new(tokio::sync::RwLock::new(connection)),
+            connection: Arc::new(RwLock::new(connection)),
             working_path: Some(working_path),
             reset_notify: PublishSubject::new(),
         })
@@ -119,7 +120,7 @@ impl DBManager {
     pub(crate) async fn new_memory_db() -> Result<Self, RepositoryError> {
         let connection = DBManager::connect_db(None).await?;
         Ok(Self {
-            connection: Arc::new(tokio::sync::RwLock::new(connection)),
+            connection: Arc::new(RwLock::new(connection)),
             working_path: None,
             reset_notify: PublishSubject::new(),
         })

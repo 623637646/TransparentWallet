@@ -1,14 +1,14 @@
 use crate::api::context::Context;
 use crate::utils::bridge_helper::{subscribe_with_bridge_callback, BridgeSubscription};
 use crate::utils::never::BridgeNever;
-use flutter_rust_bridge::DartFnFuture;
-use rust_wallet::error::WalletError;
-use rust_wallet::managers::pin::manager::PinError;
+use flutter_rust_bridge::{frb, DartFnFuture};
+pub use rust_wallet::managers::pin::manager::PinAttemptResult;
 use rx_rust::observable::observable_ext::ObservableExt;
 
-pub enum PinResult {
-    Ok,
-    Error(u8),
+#[frb(mirror(PinAttemptResult))]
+pub enum _PinAttemptResult {
+    Success,
+    Failed(u8), // remaining attempts, 0 means the app is reset.
 }
 
 impl Context {
@@ -34,25 +34,15 @@ impl Context {
         Ok(())
     }
 
-    pub async fn update_pin(&self, old_pin: &[u8], new_pin: &[u8]) -> anyhow::Result<PinResult> {
-        let result = self.0.pin_manager.update_pin(old_pin, new_pin).await;
-        match result {
-            Ok(_) => Ok(PinResult::Ok),
-            Err(WalletError::PinError(PinError::UpdatePinFailed(remaining_attempts))) => {
-                Ok(PinResult::Error(remaining_attempts))
-            }
-            Err(e) => Err(e.into()),
-        }
+    pub async fn update_pin(
+        &self,
+        old_pin: &[u8],
+        new_pin: &[u8],
+    ) -> anyhow::Result<PinAttemptResult> {
+        Ok(self.0.pin_manager.update_pin(old_pin, new_pin).await?)
     }
 
-    pub async fn verify_pin(&self, pin: &[u8]) -> anyhow::Result<PinResult> {
-        let result = self.0.pin_manager.verify_pin(pin).await;
-        match result {
-            Ok(_) => Ok(PinResult::Ok),
-            Err(WalletError::PinError(PinError::VerifyPinFailed(remaining_attempts))) => {
-                Ok(PinResult::Error(remaining_attempts))
-            }
-            Err(e) => Err(e.into()),
-        }
+    pub async fn verify_pin(&self, pin: &[u8]) -> anyhow::Result<PinAttemptResult> {
+        Ok(self.0.pin_manager.verify_pin(pin).await?)
     }
 }

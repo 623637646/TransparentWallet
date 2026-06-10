@@ -124,12 +124,12 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
                 oldPin: _oldPin,
                 newPin: _currentInput,
               );
-              if (result is PinResult_Ok) {
+              if (result is PinAttemptResult_Success) {
                 if (mounted) {
                   Toast.show(context, 'pin-modify-success');
                   Navigator.of(context).pop(true);
                 }
-              } else if (result is PinResult_Error) {
+              } else if (result is PinAttemptResult_Failed) {
                 setState(() {
                   _errorMessage = 'pin-incorrect';
                   _errorArgs = {'attempts': result.field0.toString()};
@@ -156,14 +156,14 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
         case PinStep.modifyEnterOld:
           final appContext = ref.appContext;
           final result = await appContext.verifyPin(pin: _currentInput);
-          if (result is PinResult_Ok) {
+          if (result is PinAttemptResult_Success) {
             _oldPin.clear();
             _oldPin.addAll(_currentInput);
             setState(() {
               _currentInput.clear();
               _step = PinStep.createEnterNew;
             });
-          } else if (result is PinResult_Error) {
+          } else if (result is PinAttemptResult_Failed) {
             setState(() {
               _errorMessage = 'pin-incorrect';
               _errorArgs = {'attempts': result.field0.toString()};
@@ -175,12 +175,12 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
         case PinStep.verifyEnterCurrent:
           final appContext = ref.appContext;
           final result = await appContext.verifyPin(pin: _currentInput);
-          if (result is PinResult_Ok) {
+          if (result is PinAttemptResult_Success) {
             if (mounted) {
               Toast.show(context, 'pin-verify-success');
               Navigator.of(context).pop(true);
             }
-          } else if (result is PinResult_Error) {
+          } else if (result is PinAttemptResult_Failed) {
             setState(() {
               _errorMessage = 'pin-incorrect';
               _errorArgs = {'attempts': result.field0.toString()};

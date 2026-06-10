@@ -29,14 +29,13 @@ pub enum PinError {
     #[error("Update pin when no pin")]
     UpdatePinWhenNoPin,
 
-    #[error("Update pin failed, remaining attempts {0}")]
-    UpdatePinFailed(u8), // 0 means the secure storage is cleaned.
-
     #[error("Verify pin when no pin")]
     VerifyPinWhenNoPin,
+}
 
-    #[error("Verify pin failed, remaining attempts {0}")]
-    VerifyPinFailed(u8), // 0 means the secure storage is cleaned.
+pub enum PinAttemptResult {
+    Success,
+    Failed(u8), // remaining attempts, 0 means the app is reset.
 }
 
 const KEY_NAME_DEVICE_SECRET: &str = "hardware_based_device_secret";
@@ -166,7 +165,11 @@ where
         Ok(())
     }
 
-    pub async fn update_pin(&self, old_pin: &[u8], new_pin: &[u8]) -> Result<(), WalletError> {
+    pub async fn update_pin(
+        &self,
+        old_pin: &[u8],
+        new_pin: &[u8],
+    ) -> Result<PinAttemptResult, WalletError> {
         let Some(mut secret_context) = self.secret_context.value() else {
             return Err(PinError::UpdatePinWhenNoPin.into());
         };
@@ -174,7 +177,7 @@ where
         if !secret_context.update_pin(old_pin, new_pin, &device_secret) {
             device_secret.zeroize();
             let remaining_attempts = self.handle_pin_failed().await?;
-            return Err(PinError::UpdatePinFailed(remaining_attempts).into());
+            return Ok(PinAttemptResult::Failed(remaining_attempts));
         }
         device_secret.zeroize();
         self.reset_pin_failed_count().await?;
@@ -183,10 +186,10 @@ where
         model.secret_context_data = Some(secret_context.to_bytes());
         self.repository.write_unique::<pin::Entity>(model).await?;
         self.secret_context.clone().on_next(Some(secret_context));
-        Ok(())
+        Ok(PinAttemptResult::Success)
     }
 
-    pub async fn verify_pin(&self, pin: &[u8]) -> Result<(), WalletError> {
+    pub async fn verify_pin(&self, pin: &[u8]) -> Result<PinAttemptResult, WalletError> {
         let Some(secret_context) = self.secret_context.value() else {
             return Err(PinError::VerifyPinWhenNoPin.into());
         };
@@ -195,10 +198,10 @@ where
         device_secret.zeroize();
         if result {
             self.reset_pin_failed_count().await?;
-            Ok(())
+            Ok(PinAttemptResult::Success)
         } else {
             let remaining_attempts = self.handle_pin_failed().await?;
-            Err(PinError::VerifyPinFailed(remaining_attempts).into())
+            Ok(PinAttemptResult::Failed(remaining_attempts))
         }
     }
 }
@@ -237,8 +240,14 @@ mod tests {
         manager.create(PIN).await.unwrap();
 
         assert!(manager.secret_context.value().is_some());
-        assert!(manager.verify_pin(PIN).await.is_ok());
-        assert!(manager.verify_pin(WRONG_PIN).await.is_err());
+        assert!(matches!(
+            manager.verify_pin(PIN).await,
+            Ok(PinAttemptResult::Success)
+        ));
+        assert!(matches!(
+            manager.verify_pin(WRONG_PIN).await,
+            Ok(PinAttemptResult::Failed(_))
+        ));
     }
 
     #[tokio::test]
@@ -254,8 +263,14 @@ mod tests {
             result,
             Err(WalletError::PinError(PinError::CreatePinWhenHasPin))
         ));
-        assert!(manager.verify_pin(PIN).await.is_ok());
-        assert!(manager.verify_pin(NEW_PIN).await.is_err());
+        assert!(matches!(
+            manager.verify_pin(PIN).await,
+            Ok(PinAttemptResult::Success)
+        ));
+        assert!(matches!(
+            manager.verify_pin(NEW_PIN).await,
+            Ok(PinAttemptResult::Failed(_))
+        ));
     }
 
     #[tokio::test]
@@ -295,8 +310,14 @@ mod tests {
 
         manager.update_pin(PIN, NEW_PIN).await.unwrap();
 
-        assert!(manager.verify_pin(PIN).await.is_err());
-        assert!(manager.verify_pin(NEW_PIN).await.is_ok());
+        assert!(matches!(
+            manager.verify_pin(PIN).await,
+            Ok(PinAttemptResult::Failed(_))
+        ));
+        assert!(matches!(
+            manager.verify_pin(NEW_PIN).await,
+            Ok(PinAttemptResult::Success)
+        ));
     }
 
     #[tokio::test]
@@ -308,12 +329,15 @@ mod tests {
 
         let result = manager.update_pin(WRONG_PIN, NEW_PIN).await;
 
+        assert!(matches!(result, Ok(PinAttemptResult::Failed(_))));
         assert!(matches!(
-            result,
-            Err(WalletError::PinError(PinError::UpdatePinFailed(_)))
+            manager.verify_pin(PIN).await,
+            Ok(PinAttemptResult::Success)
         ));
-        assert!(manager.verify_pin(PIN).await.is_ok());
-        assert!(manager.verify_pin(NEW_PIN).await.is_err());
+        assert!(matches!(
+            manager.verify_pin(NEW_PIN).await,
+            Ok(PinAttemptResult::Failed(_))
+        ));
     }
 
     #[tokio::test]
@@ -376,19 +400,19 @@ mod tests {
         // 1st wrong attempt
         assert!(matches!(
             manager.verify_pin(WRONG_PIN).await,
-            Err(WalletError::PinError(PinError::VerifyPinFailed(2)))
+            Ok(PinAttemptResult::Failed(2))
         ));
 
         // 2nd wrong attempt
         assert!(matches!(
             manager.verify_pin(WRONG_PIN).await,
-            Err(WalletError::PinError(PinError::VerifyPinFailed(1)))
+            Ok(PinAttemptResult::Failed(1))
         ));
 
         // 3rd wrong attempt — secure storage should be cleaned
         assert!(matches!(
             manager.verify_pin(WRONG_PIN).await,
-            Err(WalletError::PinError(PinError::VerifyPinFailed(0)))
+            Ok(PinAttemptResult::Failed(0))
         ));
 
         assert!(
@@ -410,7 +434,7 @@ mod tests {
         // 1st wrong attempt → remaining attempts = 2
         assert!(matches!(
             manager.verify_pin(WRONG_PIN).await,
-            Err(WalletError::PinError(PinError::VerifyPinFailed(2)))
+            Ok(PinAttemptResult::Failed(2))
         ));
         assert_eq!(
             secure_storage
@@ -422,7 +446,10 @@ mod tests {
         );
 
         // Correct pin → resets count to 0
-        assert!(manager.verify_pin(PIN).await.is_ok());
+        assert!(matches!(
+            manager.verify_pin(PIN).await,
+            Ok(PinAttemptResult::Success)
+        ));
         assert_eq!(
             secure_storage
                 .read(KEY_NAME_NUMBER_OF_PIN_FAILED.to_owned())
@@ -435,7 +462,7 @@ mod tests {
         // Wrong again → counting restarts from 3
         assert!(matches!(
             manager.verify_pin(WRONG_PIN).await,
-            Err(WalletError::PinError(PinError::VerifyPinFailed(2)))
+            Ok(PinAttemptResult::Failed(2))
         ));
     }
 
@@ -449,7 +476,7 @@ mod tests {
         // Update with wrong pin → remaining attempts = 2
         assert!(matches!(
             manager.update_pin(WRONG_PIN, NEW_PIN).await,
-            Err(WalletError::PinError(PinError::UpdatePinFailed(2)))
+            Ok(PinAttemptResult::Failed(2))
         ));
         assert_eq!(
             secure_storage

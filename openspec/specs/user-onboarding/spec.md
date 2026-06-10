@@ -35,7 +35,6 @@ The transition between the empty action space on earlier slides and the stacked 
 - **WHEN** the user taps the "Hot Wallet" button on the onboarding carousel screen
 - **THEN** the application calls `appContext.setAppMode(appMode: AppMode.hotWallet)` and updates the UI stream to display the Hot Wallet interface
 
-
 ### Requirement: Language selection and configuration during onboarding
 The onboarding screen SHALL feature a language selection button displaying the currently active language (e.g. "English" or "简体中文"). When the user taps the language selection button, the application SHALL display a modal bottom sheet popup showing all available language options (English, Chinese) and a "System Language" option. Selecting an option SHALL trigger `appContext.setLanguage`. Specifically:
 - If the user selects "System Language", the application SHALL call `appContext.setLanguage(language: null)`.
@@ -54,4 +53,14 @@ The language selection button SHALL dynamically display the actual resolved/effe
 - **WHEN** the user taps the language selection button, selects "System Language" from the bottom sheet
 - **THEN** the application calls `appContext.setLanguage(language: null)` and the UI language updates to match the system language
 
+### Requirement: Symmetrical Radial Reveal App Mode Transition
+The root of the application SHALL wrap the active `MaterialApp` in a transition-aware switcher. When transitioning between `AppMode` states (both entering cold/hot wallet modes from onboarding, and returning to onboarding upon a wallet reset), the application SHALL run a symmetrical radial reveal (circular clip) animation.
+1. The new `MaterialApp` instance corresponding to the destination mode SHALL be positioned on top of the old `MaterialApp` instance inside a `Stack`.
+2. The top `MaterialApp` SHALL clip its layout to an expanding circle centered on the screen, growing from a fraction of 0.0 to 1.0 (covering the entire screen diagonal).
+3. The bottom `MaterialApp` SHALL be wrapped in an `IgnorePointer` during the animation to disable all touch interactions and prevent gesture bleed.
+4. Upon animation completion, the bottom `MaterialApp` and its entire navigator stack SHALL be removed from the widget tree and destroyed.
+
+#### Scenario: App mode transition runs radial reveal animation
+- **WHEN** the `AppMode` changes (either from init to hot/cold wallet, or from hot/cold wallet back to init)
+- **THEN** the application launches the target MaterialApp in a Stack, runs the expanding circular reveal animation from the center, blocks gestures on the bottom MaterialApp, and disposes the old MaterialApp on completion
 

@@ -18,7 +18,7 @@ impl Context {
         on_termination: impl Fn(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
-            |_| self.0.pin_manager.has_pin().map_infallible_to_error(),
+            || self.0.pin_manager.has_pin().map_infallible_to_error(),
             on_next,
             on_termination,
         )

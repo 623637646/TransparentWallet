@@ -28,7 +28,7 @@ pub async fn init_logger(
     on_termination: impl Fn(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
 ) -> BridgeSubscription {
     subscribe_with_bridge_callback(
-        |_| init_logger_observable().map_infallible_to_error(),
+        || init_logger_observable().map_infallible_to_error(),
         on_next,
         on_termination,
     )

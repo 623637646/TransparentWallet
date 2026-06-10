@@ -19,7 +19,7 @@ impl Context {
         on_termination: impl Fn(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
-            |_| self.0.app_mode_manager.app_mode().map_infallible_to_error(),
+            || self.0.app_mode_manager.app_mode().map_infallible_to_error(),
             on_next,
             on_termination,
         )

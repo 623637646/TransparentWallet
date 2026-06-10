@@ -20,7 +20,7 @@ impl Context {
         on_termination: impl Fn(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
-            |_| {
+            || {
                 self.0
                     .localization_manager
                     .language()
@@ -49,7 +49,7 @@ impl Context {
         on_termination: impl Fn(Option<String>) -> DartFnFuture<()> + Send + Sync + 'static,
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
-            |_| {
+            || {
                 self.0
                     .localization_manager
                     .lookup(text_id, args)

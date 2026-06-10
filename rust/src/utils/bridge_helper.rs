@@ -5,7 +5,6 @@ use rx_rust::{
     observer::Termination,
 };
 use std::sync::Arc;
-use tokio::runtime::Handle;
 
 #[frb(opaque)]
 pub struct BridgeSubscription {
@@ -13,7 +12,7 @@ pub struct BridgeSubscription {
 }
 
 pub(crate) fn subscribe_with_bridge_callback<T, E, OE>(
-    observable_builder: impl FnOnce(Handle) -> OE,
+    observable_builder: impl FnOnce() -> OE,
     on_next: impl Fn(T) -> DartFnFuture<()> + Send + Sync + 'static,
     on_termination: impl Fn(Option<E>) -> DartFnFuture<()> + Send + Sync + 'static,
 ) -> BridgeSubscription
@@ -22,15 +21,13 @@ where
     E: Send + Sync + 'static,
     OE: Observable<'static, 'static, T, E>,
 {
-    let runtime = tokio::runtime::Handle::current();
-    let runtime_cloned = runtime.clone();
     let on_next = Arc::new(on_next);
 
-    let observable = observable_builder(runtime.clone());
+    let observable = observable_builder();
     let sub = observable.on_backpressure_buffer().subscribe_with_callback(
         move |(values, request)| {
             let on_next = on_next.clone();
-            runtime.spawn(async move {
+            tokio::spawn(async move {
                 for value in values {
                     on_next(value).await;
                 }
@@ -38,7 +35,7 @@ where
             });
         },
         move |termination| {
-            runtime_cloned.spawn(async move {
+            tokio::spawn(async move {
                 on_termination(match termination {
                     Termination::Completed => None,
                     Termination::Error(error) => Some(error),

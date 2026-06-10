@@ -12,7 +12,7 @@ use rx_rust::{
     disposable::subscription::Subscription,
     observable::{Observable, observable_ext::ObservableExt},
     observer::Observer,
-    subject::behavior_subject::BehaviorSubject,
+    subject::{behavior_subject::BehaviorSubject, publish_subject::PublishSubject},
 };
 use std::convert::Infallible;
 use thiserror::Error;
@@ -45,6 +45,7 @@ pub struct PinManager<R, S> {
     repository: R,
     secure_storage: S,
     secret_context: BehaviorSubject<'static, Option<SecretContext>, Infallible>, // None means that the user has not set a PIN yet
+    app_reset_required: PublishSubject<'static, (), Infallible>,
     _subscription: Subscription<'static>,
 }
 
@@ -64,6 +65,7 @@ where
             repository,
             secure_storage,
             secret_context,
+            app_reset_required: PublishSubject::new(),
             _subscription,
         })
     }
@@ -115,7 +117,8 @@ where
                     .await?;
                 Ok(TOTAL_ATTEMPTS - number_of_pin_failed)
             } else {
-                self.secure_storage.clean().await?;
+                log::warn!("PIN attempts exhausted — signalling app reset");
+                self.app_reset_required.clone().on_next(());
                 Ok(0)
             }
         } else {
@@ -130,6 +133,10 @@ where
         self.secure_storage
             .write(KEY_NAME_NUMBER_OF_PIN_FAILED.to_owned(), Some(vec![0]))
             .await
+    }
+
+    pub(crate) fn app_reset_required(&self) -> impl Observable<'static, 'static, (), Infallible> {
+        self.app_reset_required.clone()
     }
 
     pub fn has_pin(&self) -> impl Observable<'static, 'static, bool, Infallible> {
@@ -383,45 +390,41 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn verify_pin_cleans_secure_storage_after_three_failures() {
+    async fn handle_pin_failed_emits_reset_signal_on_exhaustion() {
+        use rx_rust::observable::observable_ext::ObservableExt;
+        use std::sync::{Arc, Mutex};
+
         let db = DBManager::new_memory_db().await.unwrap();
         let secure_storage = MockSecureStorage::new();
-        let manager = PinManager::new(db, secure_storage.clone()).await.unwrap();
+        let manager = PinManager::new(db, secure_storage).await.unwrap();
         manager.create(PIN).await.unwrap();
 
-        assert!(
-            secure_storage
-                .read(KEY_NAME_DEVICE_SECRET.to_owned())
-                .await
-                .unwrap()
-                .is_some()
+        let received: Arc<Mutex<Vec<()>>> = Arc::new(Mutex::new(vec![]));
+        let received_clone = received.clone();
+        let _sub = manager.app_reset_required().subscribe_with_callback(
+            move |_| {
+                received_clone.lock().unwrap().push(());
+            },
+            |_| {},
         );
 
-        // 1st wrong attempt
+        // 1st and 2nd wrong attempts — no signal yet
         assert!(matches!(
             manager.verify_pin(WRONG_PIN).await,
             Ok(PinAttemptResult::Failed(2))
         ));
-
-        // 2nd wrong attempt
         assert!(matches!(
             manager.verify_pin(WRONG_PIN).await,
             Ok(PinAttemptResult::Failed(1))
         ));
+        assert_eq!(received.lock().unwrap().len(), 0);
 
-        // 3rd wrong attempt — secure storage should be cleaned
+        // 3rd wrong attempt — signal fires
         assert!(matches!(
             manager.verify_pin(WRONG_PIN).await,
             Ok(PinAttemptResult::Failed(0))
         ));
-
-        assert!(
-            secure_storage
-                .read(KEY_NAME_DEVICE_SECRET.to_owned())
-                .await
-                .unwrap()
-                .is_none()
-        );
+        assert_eq!(received.lock().unwrap().len(), 1);
     }
 
     #[tokio::test]

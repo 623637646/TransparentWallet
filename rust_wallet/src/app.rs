@@ -12,6 +12,7 @@ use crate::{
     },
 };
 use bon::bon;
+use rx_rust::{disposable::subscription::Subscription, observable::observable_ext::ObservableExt};
 use std::path::PathBuf;
 
 pub struct WalletApp {
@@ -20,6 +21,7 @@ pub struct WalletApp {
     pub app_mode_manager: AppModeManager<DBManager>,
     pub localization_manager: LocalizationManager<DBManager>,
     pub pin_manager: PinManager<DBManager, SecureStorageManager>,
+    _subscription: Subscription<'static>,
 }
 
 #[bon]
@@ -47,18 +49,37 @@ impl WalletApp {
         let pin_manager =
             PinManager::new(db_manager.clone(), secure_storage_manager.clone()).await?;
 
+        // Subscribe to pin reset signal: when PIN attempts are exhausted, perform a full app reset
+        let db_manager_cloned = db_manager.clone();
+        let secure_storage_manager_cloned = secure_storage_manager.clone();
+        let _subscription = pin_manager.app_reset_required().subscribe_with_callback(
+            move |_| {
+                let db = db_manager_cloned.clone();
+                let storage = secure_storage_manager_cloned.clone();
+                tokio::spawn(async move {
+                    _ = do_reset_app(&storage, &db).await;
+                });
+            },
+            |_| {},
+        );
+
         Ok(Self {
             db_manager,
             secure_storage_manager,
             app_mode_manager,
             localization_manager,
             pin_manager,
+            _subscription,
         })
     }
 
     pub async fn reset_app(&self) -> Result<(), WalletError> {
-        self.secure_storage_manager.clean().await?;
-        self.db_manager.reset().await?;
-        Ok(())
+        do_reset_app(&self.secure_storage_manager, &self.db_manager).await
     }
+}
+
+async fn do_reset_app(storage: &SecureStorageManager, db: &DBManager) -> Result<(), WalletError> {
+    storage.clean().await?;
+    db.reset().await?;
+    Ok(())
 }

@@ -12,8 +12,5 @@ Future<void> main() async {
   // Init rust logger
   initRustLogger();
 
-  // Wait for Flutter Widgets to initialize
-  WidgetsFlutterBinding.ensureInitialized();
-
   runApp(const ProviderScope(child: MyApp()));
 }

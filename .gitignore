@@ -49,3 +49,4 @@ app.*.map.json
 target
 lib/src/rust
 rust/src/frb_generated.rs
+devtools_options.yaml

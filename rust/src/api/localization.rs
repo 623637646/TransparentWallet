@@ -31,12 +31,12 @@ impl Context {
         )
     }
 
-    pub async fn set_language(&self, language: Option<Language>) {
-        let _ = self
-            .wallet_app
+    pub async fn set_language(&self, language: Option<Language>) -> anyhow::Result<()> {
+        self.wallet_app
             .localization_manager
             .set_language(language)
-            .await;
+            .await?;
+        Ok(())
     }
 
     pub async fn set_system_languages(&self, languages: Vec<String>) {

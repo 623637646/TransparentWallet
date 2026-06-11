@@ -79,7 +79,7 @@ impl SecureStorage for SecureStorageManager {
     }
 
     async fn clean(&self) -> Result<(), SecureStorageError> {
-        log::debug!("Secure storage clean");
+        log::warn!("Secure storage clean");
         (self.cleaner)().await.inspect_err(|e| {
             log::error!("clean secure storage error: {}", e);
         })

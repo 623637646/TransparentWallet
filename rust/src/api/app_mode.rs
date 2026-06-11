@@ -30,11 +30,11 @@ impl Context {
         )
     }
 
-    pub async fn set_app_mode(&self, app_mode: AppMode) {
-        _ = self
-            .wallet_app
+    pub async fn set_app_mode(&self, app_mode: AppMode) -> anyhow::Result<()> {
+        self.wallet_app
             .app_mode_manager
             .set_app_mode(app_mode)
-            .await;
+            .await?;
+        Ok(())
     }
 }

@@ -192,7 +192,7 @@ impl Repository for DBManager {
     }
 
     fn reset(&self) -> impl Future<Output = Result<(), RepositoryError>> + Send + 'static {
-        log::debug!("Reset Database");
+        log::warn!("Reset Database");
         let connection = self.connection.clone();
         let working_path = self.working_path.clone();
         let mut reset_notify = self.reset_notify.clone();

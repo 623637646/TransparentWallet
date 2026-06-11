@@ -61,7 +61,7 @@ impl WalletApp {
                 let db = db_manager_cloned.clone();
                 let storage = secure_storage_manager_cloned.clone();
                 tokio::spawn(async move {
-                    _ = do_reset_app(&storage, &db).await;
+                    do_reset_app(&storage, &db).await.unwrap();
                 });
             },
             |_| {},

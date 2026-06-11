@@ -1,21 +1,41 @@
 PODS:
   - Flutter (1.0.0)
+  - flutter_secure_storage_darwin (10.0.0):
+    - Flutter
+    - FlutterMacOS
+  - integration_test (0.0.1):
+    - Flutter
   - rust_lib_janus_wallet (0.0.1):
     - Flutter
+  - sqflite_darwin (0.0.4):
+    - Flutter
+    - FlutterMacOS
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - flutter_secure_storage_darwin (from `.symlinks/plugins/flutter_secure_storage_darwin/darwin`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - rust_lib_janus_wallet (from `.symlinks/plugins/rust_lib_janus_wallet/ios`)
+  - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  flutter_secure_storage_darwin:
+    :path: ".symlinks/plugins/flutter_secure_storage_darwin/darwin"
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
   rust_lib_janus_wallet:
     :path: ".symlinks/plugins/rust_lib_janus_wallet/ios"
+  sqflite_darwin:
+    :path: ".symlinks/plugins/sqflite_darwin/darwin"
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_secure_storage_darwin: acdb3f316ed05a3e68f856e0353b133eec373a23
+  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
   rust_lib_janus_wallet: 93b6b32f893aac51eff7c07e7073b7ba863e8ff0
+  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
 
 PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
 

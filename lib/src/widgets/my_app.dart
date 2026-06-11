@@ -20,17 +20,7 @@ class MyApp extends ConsumerWidget {
 
     return contextAsync.when(
       skipLoadingOnRefresh: false,
-      loading: () => _buildApp(
-        mode: AppMode.init,
-        home: Scaffold(
-          backgroundColor: initialTokens.colors.canvas,
-          body: Center(
-            child: CircularProgressIndicator(
-              color: initialTokens.colors.primary,
-            ),
-          ),
-        ),
-      ),
+      loading: () => const SizedBox.shrink(),
       error: (error, stack) => _buildApp(
         mode: AppMode.init,
         home: Scaffold(
@@ -52,17 +42,6 @@ class MyApp extends ConsumerWidget {
                 onNext: onNext,
                 onTermination: onTermination,
               ),
-          loadingBuilder: (context) => _buildApp(
-            mode: AppMode.init,
-            home: Scaffold(
-              backgroundColor: initialTokens.colors.canvas,
-              body: Center(
-                child: CircularProgressIndicator(
-                  color: initialTokens.colors.primary,
-                ),
-              ),
-            ),
-          ),
           errorBuilder: (context, error) => _buildApp(
             mode: AppMode.init,
             home: Scaffold(

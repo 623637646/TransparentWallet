@@ -111,7 +111,7 @@ class _RustStreamBuilderState<T, E extends Object>
           if (widget.loadingBuilder != null) {
             return widget.loadingBuilder!(context);
           }
-          return const Center(child: CircularProgressIndicator());
+          return const SizedBox.shrink();
         }
 
         // Render target widget with active data

@@ -7,6 +7,7 @@ import '../../utils/app_context.dart';
 import '../../utils/design_tokens.dart';
 import 'localized_text.dart';
 import 'toast.dart';
+import 'loading_overlay.dart';
 
 enum PinBottomSheetMode { create, modify, verify }
 
@@ -104,6 +105,7 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
     setState(() {
       _isProcessing = true;
     });
+    ref.read(globalLoadingProvider.notifier).show();
 
     try {
       switch (_step) {
@@ -199,6 +201,7 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
       setState(() {
         _isProcessing = false;
       });
+      ref.read(globalLoadingProvider.notifier).hide();
     }
   }
 
@@ -335,16 +338,7 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
                       fontWeight: FontWeight.w500,
                     ),
                   )
-                : (_isProcessing
-                      ? SizedBox(
-                          width: 16.0,
-                          height: 16.0,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.0,
-                            color: tokens.colors.primary,
-                          ),
-                        )
-                      : const SizedBox.shrink()),
+                : const SizedBox.shrink(),
           ),
 
           SizedBox(height: DesignTokens.spacing.md),

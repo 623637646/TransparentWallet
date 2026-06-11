@@ -6,6 +6,7 @@ import '../rust/utils/never.dart';
 import '../utils/app_context.dart';
 import '../utils/design_tokens.dart';
 import 'common/rust_stream_builder.dart';
+import 'common/loading_overlay.dart';
 import 'onboarding_screen.dart';
 import 'cold_wallet_home.dart';
 import 'hot_wallet_home.dart';
@@ -184,6 +185,15 @@ Widget _buildApp({required AppMode mode, required Widget home}) {
         useMaterial3: true,
       ),
       home: home,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            // ignore: use_null_aware_elements
+            if (child != null) child,
+            const GlobalLoadingOverlay(),
+          ],
+        );
+      },
     ),
   );
 }

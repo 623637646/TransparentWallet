@@ -54,3 +54,10 @@ Upon successful completion of any PIN operation (creation, modification, verific
 #### Scenario: PIN verification success toast
 - **WHEN** the user successfully verifies their current PIN
 - **THEN** the bottom sheet closes immediately, and a success Toast showing "PIN verified" is displayed at the top of the screen.
+
+### Requirement: Global loading overlay integration during PIN processing
+During PIN creation, modification, or verification processing, the `PinBottomSheet` SHALL trigger the global loading overlay to block user interactions and screen dismissal.
+
+#### Scenario: Global loading overlay displayed during PIN verification
+- **WHEN** the user submits the PIN for verification
+- **THEN** the global loading overlay SHALL be displayed, blocking all gestures and preventing dismissal of the bottom sheet until processing completes.

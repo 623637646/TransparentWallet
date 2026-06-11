@@ -80,8 +80,6 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
     if (_isProcessing) return;
     if (_currentInput.length < 6) {
       setState(() {
-        _errorMessage = null;
-        _errorArgs = null;
         _currentInput.add(digit);
       });
       if (_currentInput.length == 6) {
@@ -94,8 +92,6 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
     if (_isProcessing) return;
     if (_currentInput.isNotEmpty) {
       setState(() {
-        _errorMessage = null;
-        _errorArgs = null;
         _currentInput.removeLast();
       });
     }
@@ -113,6 +109,8 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
           _firstPin.clear();
           _firstPin.addAll(_currentInput);
           setState(() {
+            _errorMessage = null;
+            _errorArgs = null;
             _currentInput.clear();
             _step = PinStep.createConfirmNew;
           });
@@ -162,6 +160,8 @@ class _PinBottomSheetState extends ConsumerState<PinBottomSheet> {
             _oldPin.clear();
             _oldPin.addAll(_currentInput);
             setState(() {
+              _errorMessage = null;
+              _errorArgs = null;
               _currentInput.clear();
               _step = PinStep.createEnterNew;
             });

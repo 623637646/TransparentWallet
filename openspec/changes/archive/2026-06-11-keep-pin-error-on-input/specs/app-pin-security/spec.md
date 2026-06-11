@@ -1,18 +1,4 @@
-# App PIN Security Spec
-
-## Purpose
-Define requirements for custom secure PIN input layout, creation flow, modification flow, and verification flow.
-## Requirements
-### Requirement: App PIN UI structure and layout
-The application SHALL provide a PIN input UI in the form of a modal bottom sheet.
-1. The PIN input area SHALL support exactly 6 numeric characters (0-9).
-2. The UI SHALL be dynamically styled utilizing tokens from `design_tokens.dart` resolved via the active `DesignTheme.of(context)`.
-3. It SHALL use `LocalizedText` for all user-visible text (e.g., titles, prompts, error messages).
-4. The UI SHALL show a grid of numbers (0-9) and a backspace button for user input, rather than relying on the system keyboard, ensuring a consistent custom secure layout.
-
-#### Scenario: PIN bottom sheet renders with custom numeric keypad
-- **WHEN** the PIN bottom sheet is displayed
-- **THEN** it renders a custom numeric grid (0-9), backspace, and placeholder dots for the 6-digit PIN code, styled with DesignTheme tokens
+## MODIFIED Requirements
 
 ### Requirement: Create PIN flow
 The system SHALL execute the Create PIN flow when the PIN bottom sheet is launched in "Create" mode:
@@ -66,4 +52,3 @@ The system SHALL execute the Verify PIN flow when the PIN bottom sheet is launch
 #### Scenario: Verify PIN cancelled
 - **WHEN** the user is in "Verify" mode and dismisses the bottom sheet without entering the correct PIN
 - **THEN** the system returns cancellation to the caller
-

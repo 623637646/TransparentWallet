@@ -17,6 +17,7 @@ final Logger logger = Logger(
   ),
 );
 
+@pragma('vm:entry-point')
 Future<BridgeSubscription>? _loggerSubscription;
 
 void initRustLogger() {

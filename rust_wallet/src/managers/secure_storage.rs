@@ -50,7 +50,7 @@ pub struct SecureStorageManager {
 }
 
 impl SecureStorageManager {
-    pub fn new(
+    pub(crate) fn new(
         writer: SecureStorageWriter,
         reader: SecureStorageReader,
         cleaner: SecureStorageCleaner,

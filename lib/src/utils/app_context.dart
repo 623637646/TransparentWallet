@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:janus_wallet/src/rust/api/context.dart';
+import 'package:janus_wallet/src/utils/logger.dart';
 import 'package:janus_wallet/src/utils/secure_storage.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/foundation.dart';
@@ -28,6 +29,7 @@ Future<Context> initAppContext() async {
 
   final context = await initContext(
     workingDir: workingDir,
+    logger: logFromRust,
     secureStorageWriter: writer,
     secureStorageReader: reader,
     secureStorageCleaner: cleaner,

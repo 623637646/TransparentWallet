@@ -18,19 +18,24 @@ impl Context {
         on_termination: impl Fn(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
-            || self.0.pin_manager.has_pin().map_infallible_to_error(),
+            || {
+                self.wallet_app
+                    .pin_manager
+                    .has_pin()
+                    .map_infallible_to_error()
+            },
             on_next,
             on_termination,
         )
     }
 
     pub async fn create_pin(&self, pin: &[u8]) -> anyhow::Result<()> {
-        self.0.pin_manager.create(pin).await?;
+        self.wallet_app.pin_manager.create(pin).await?;
         Ok(())
     }
 
     pub async fn delete_pin(&self) -> anyhow::Result<()> {
-        self.0.pin_manager.delete_pin().await?;
+        self.wallet_app.pin_manager.delete_pin().await?;
         Ok(())
     }
 
@@ -39,10 +44,14 @@ impl Context {
         old_pin: &[u8],
         new_pin: &[u8],
     ) -> anyhow::Result<PinAttemptResult> {
-        Ok(self.0.pin_manager.update_pin(old_pin, new_pin).await?)
+        Ok(self
+            .wallet_app
+            .pin_manager
+            .update_pin(old_pin, new_pin)
+            .await?)
     }
 
     pub async fn verify_pin(&self, pin: &[u8]) -> anyhow::Result<PinAttemptResult> {
-        Ok(self.0.pin_manager.verify_pin(pin).await?)
+        Ok(self.wallet_app.pin_manager.verify_pin(pin).await?)
     }
 }

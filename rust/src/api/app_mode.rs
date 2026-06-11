@@ -19,13 +19,22 @@ impl Context {
         on_termination: impl Fn(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
-            || self.0.app_mode_manager.app_mode().map_infallible_to_error(),
+            || {
+                self.wallet_app
+                    .app_mode_manager
+                    .app_mode()
+                    .map_infallible_to_error()
+            },
             on_next,
             on_termination,
         )
     }
 
     pub async fn set_app_mode(&self, app_mode: AppMode) {
-        _ = self.0.app_mode_manager.set_app_mode(app_mode).await;
+        _ = self
+            .wallet_app
+            .app_mode_manager
+            .set_app_mode(app_mode)
+            .await;
     }
 }

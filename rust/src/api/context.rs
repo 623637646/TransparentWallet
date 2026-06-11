@@ -1,5 +1,9 @@
-use flutter_rust_bridge::{DartFnFuture, PanicBacktrace};
-use rust_wallet::{app::WalletApp, managers::secure_storage::SecureStorageError};
+use crate::utils::bridge_helper::{subscribe_with_bridge_callback, BridgeSubscription};
+use flutter_rust_bridge::{frb, DartFnFuture, PanicBacktrace};
+pub use rust_wallet::logger::{LogEntry, LogLevel};
+use rust_wallet::{
+    app::WalletApp, logger::get_logger_observable, managers::secure_storage::SecureStorageError,
+};
 use std::{future::Future, pin::Pin, sync::Arc};
 
 #[flutter_rust_bridge::frb(init)]
@@ -10,8 +14,26 @@ pub async fn init_rust() {
 
 type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
+#[frb(mirror(LogEntry))]
+pub struct _LogEntry {
+    pub time_millis: u128,
+    pub level: LogLevel,
+    pub tag: String,
+    pub msg: String,
+}
+
+#[frb(mirror(LogLevel))]
+pub enum _LogLevel {
+    Trace,
+    Debug,
+    Info,
+    Warn,
+    Error,
+}
+
 pub async fn init_context(
     working_dir: String,
+    logger: impl Fn(LogEntry) -> DartFnFuture<()> + Send + Sync + 'static,
     secure_storage_writer: impl Fn(String, Option<Vec<u8>>) -> DartFnFuture<Option<String>>
         + Send
         + Sync
@@ -22,61 +44,70 @@ pub async fn init_context(
         + 'static,
     secure_storage_cleaner: impl Fn() -> DartFnFuture<Option<String>> + Send + Sync + 'static,
 ) -> anyhow::Result<Context> {
-    let writer = Arc::new(secure_storage_writer);
-    let writer = Arc::new(
+    // Must init logger first
+    let _log_subscription =
+        subscribe_with_bridge_callback(get_logger_observable, logger, |_| unreachable!());
+
+    let secure_storage_writer = Arc::new(
         move |key: String,
               data: Option<Vec<u8>>|
               -> BoxFuture<'static, Result<(), SecureStorageError>> {
-            let writer = writer.clone();
+            let future = secure_storage_writer(key, data);
             Box::pin(async move {
-                match writer(key, data).await {
+                match future.await {
                     Some(error) => Err(SecureStorageError::WriteFailed(error)),
                     None => Ok(()),
                 }
             })
         },
     );
-    let reader = Arc::new(secure_storage_reader);
-    let reader = Arc::new(
+    let secure_storage_reader = Arc::new(
         move |key: String| -> BoxFuture<'static, Result<Option<Vec<u8>>, SecureStorageError>> {
-            let reader = reader.clone();
-            Box::pin(async move {
-                match reader(key).await {
+            let future = secure_storage_reader(key);
+            Box::pin(async {
+                match future.await {
                     (_, Some(error)) => Err(SecureStorageError::ReadFailed(error)),
                     (data, None) => Ok(data),
                 }
             })
         },
     );
-    let cleaner = Arc::new(secure_storage_cleaner);
-    let cleaner = Arc::new(
+    let secure_storage_cleaner = Arc::new(
         move || -> BoxFuture<'static, Result<(), SecureStorageError>> {
-            let cleaner = cleaner.clone();
-            Box::pin(async move {
-                match cleaner().await {
+            let future = secure_storage_cleaner();
+            Box::pin(async {
+                match future.await {
                     Some(error) => Err(SecureStorageError::CleanFailed(error)),
                     None => Ok(()),
                 }
             })
         },
     );
+
     let wallet_app = WalletApp::builder()
         .working_dir(working_dir.into())
-        .writer(writer)
-        .reader(reader)
-        .cleaner(cleaner)
+        .secure_storage_writer(secure_storage_writer)
+        .secure_storage_reader(secure_storage_reader)
+        .secure_storage_cleaner(secure_storage_cleaner)
         .build()
         .await?;
-    let context = Context(wallet_app);
+
+    let context = Context {
+        wallet_app,
+        _log_subscription,
+    };
     Ok(context)
 }
 
 #[flutter_rust_bridge::frb(opaque)]
-pub struct Context(pub(crate) WalletApp);
+pub struct Context {
+    pub(crate) wallet_app: WalletApp,
+    _log_subscription: BridgeSubscription,
+}
 
 impl Context {
     pub async fn reset_app(&self) -> anyhow::Result<()> {
-        self.0.reset_app().await?;
+        self.wallet_app.reset_app().await?;
         Ok(())
     }
 }

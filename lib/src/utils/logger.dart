@@ -1,8 +1,6 @@
-import 'dart:async';
 import 'dart:io';
+import 'package:janus_wallet/src/rust/api/context.dart';
 import 'package:logger/logger.dart';
-import 'package:janus_wallet/src/rust/api/logger.dart';
-import 'package:janus_wallet/src/rust/utils/bridge_helper.dart';
 
 final Logger logger = Logger(
   printer: PrettyPrinter(
@@ -17,25 +15,7 @@ final Logger logger = Logger(
   ),
 );
 
-@pragma('vm:entry-point')
-Future<BridgeSubscription>? _loggerSubscription;
-
-void initRustLogger() {
-  assert(_loggerSubscription == null);
-
-  _loggerSubscription = initLogger(
-    onNext: _logEntry,
-    onTermination: (error) {
-      if (error != null) {
-        logger.e('Rust logger stream error: $error');
-      } else {
-        logger.i('Rust logger stream completed');
-      }
-    },
-  );
-}
-
-void _logEntry(LogEntry logEntry) {
+void logFromRust(LogEntry logEntry) {
   final message = '[${logEntry.tag}] ${logEntry.msg}';
   final time = DateTime.fromMillisecondsSinceEpoch(
     logEntry.timeMillis.toInt(),

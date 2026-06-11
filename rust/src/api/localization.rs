@@ -21,7 +21,7 @@ impl Context {
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
             || {
-                self.0
+                self.wallet_app
                     .localization_manager
                     .language()
                     .map_infallible_to_error()
@@ -32,11 +32,15 @@ impl Context {
     }
 
     pub async fn set_language(&self, language: Option<Language>) {
-        let _ = self.0.localization_manager.set_language(language).await;
+        let _ = self
+            .wallet_app
+            .localization_manager
+            .set_language(language)
+            .await;
     }
 
     pub async fn set_system_languages(&self, languages: Vec<String>) {
-        self.0
+        self.wallet_app
             .localization_manager
             .set_supported_system_languages(languages);
     }
@@ -50,7 +54,7 @@ impl Context {
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
             || {
-                self.0
+                self.wallet_app
                     .localization_manager
                     .lookup(text_id, args)
                     .catch(|error| Throw::new(error.to_string()).map_infallible_to_value())

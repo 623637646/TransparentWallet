@@ -25,3 +25,11 @@ The guidelines SHALL instruct developers/agents to run the `update-directory-str
 #### Scenario: Verify update skill instructions
 - **WHEN** reading Section 6 of `AGENTS.md`
 - **THEN** it SHALL recommend executing the `update-directory-structure` skill to ensure the Directory Structure contents remain accurate.
+
+### Requirement: Code Formatting
+The `AGENTS.md` guidelines SHALL instruct developers/agents to format all modified source code using language-appropriate formatters before finalizing their tasks.
+
+#### Scenario: Verify code formatting instructions
+- **WHEN** reading Section 6 of `AGENTS.md`
+- **THEN** the guidelines SHALL require formatting modified files (e.g., using `dart format` for Dart and `cargo fmt` for Rust) before completing a task.
+

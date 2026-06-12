@@ -86,6 +86,7 @@ janus_wallet/
 │       ├── utils/                         — Modify files here when adding or updating reusable Dart utilities.
 │       │   ├── app_context.dart           — Modify this file when changing the appContext Riverpod provider, secure storage, or system language initialization.
 │       │   ├── design_tokens.dart         — Import this file when consuming global styling parameters, spacing, colors, or typography tokens.
+│       │   ├── ffi_logging_handler.dart   — Modify this file when changing the global FFI interceptor, execution logs, or sensitive parameter masking.
 │       │   ├── logger.dart                — Import this file whenever you need to log messages from the Dart side.
 │       │   └── secure_storage.dart        — Modify this file when updating platform-specific secure storage options or wrappers.
 │       │

@@ -11,29 +11,31 @@ import 'onboarding_screen.dart';
 import 'cold_wallet_home.dart';
 import 'hot_wallet_home.dart';
 
+/// The root widget of the Janus Wallet application.
+///
+/// It initializes the application context and dynamically switches between
+/// operating modes (Cold Wallet, Hot Wallet, or Onboarding/Initialization)
+/// with a radial transition animation.
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
+
+  static final Map<AppMode, GlobalKey> _appKeys = {
+    AppMode.init: GlobalKey(debugLabel: 'init_app'),
+    AppMode.coldWallet: GlobalKey(debugLabel: 'cold_app'),
+    AppMode.hotWallet: GlobalKey(debugLabel: 'hot_app'),
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final contextAsync = ref.watch(appContextProvider);
-    final initialTokens = DesignTokens.of(AppMode.init);
 
     return contextAsync.when(
       skipLoadingOnRefresh: false,
       loading: () => const SizedBox.shrink(),
       error: (error, stack) => _buildApp(
         mode: AppMode.init,
-        home: Scaffold(
-          backgroundColor: initialTokens.colors.canvas,
-          body: Center(
-            child: Text(
-              'Failed to initialize app: $error',
-              style: DesignTokens.typography.body.copyWith(
-                color: initialTokens.colors.ink,
-              ),
-            ),
-          ),
+        home: _BootstrapErrorScreen(
+          message: 'Failed to initialize app: $error',
         ),
       ),
       data: (rustContext) {
@@ -45,17 +47,7 @@ class MyApp extends ConsumerWidget {
               ),
           errorBuilder: (context, error) => _buildApp(
             mode: AppMode.init,
-            home: Scaffold(
-              backgroundColor: initialTokens.colors.canvas,
-              body: Center(
-                child: Text(
-                  'Error: $error',
-                  style: DesignTokens.typography.body.copyWith(
-                    color: initialTokens.colors.ink,
-                  ),
-                ),
-              ),
-            ),
+            home: _BootstrapErrorScreen(message: 'Error: $error'),
           ),
           builder: (context, mode) {
             return AppModeRevealSwitcher(mode: mode);
@@ -64,8 +56,85 @@ class MyApp extends ConsumerWidget {
       },
     );
   }
+
+  /// Builds a [Widget] representing the entry page for the given [AppMode].
+  static Widget _buildPageForMode(AppMode mode) {
+    switch (mode) {
+      case AppMode.init:
+        return const OnboardingScreen();
+      case AppMode.coldWallet:
+        return const ColdWalletHome();
+      case AppMode.hotWallet:
+        return const HotWalletHome();
+    }
+  }
+
+  /// Helper to build the application container configured for the given [AppMode].
+  static Widget _buildAppForMode(AppMode mode) {
+    return _buildApp(mode: mode, home: _buildPageForMode(mode));
+  }
+
+  /// Builds the top-level [MaterialApp] wrapped in the mode's [DesignTheme].
+  static Widget _buildApp({required AppMode mode, required Widget home}) {
+    final tokens = DesignTokens.of(mode);
+    return DesignTheme(
+      key: _appKeys[mode],
+      tokens: tokens,
+      child: MaterialApp(
+        title: 'Janus Wallet',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          fontFamily: 'Inter',
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: tokens.colors.primary,
+            primary: tokens.colors.primary,
+            surface: tokens.colors.canvas,
+          ),
+          useMaterial3: true,
+        ),
+        home: home,
+        builder: (context, child) {
+          return Stack(
+            children: [
+              // ignore: use_null_aware_elements
+              if (child != null) child,
+              const GlobalLoadingOverlay(),
+            ],
+          );
+        },
+      ),
+    );
+  }
 }
 
+/// A screen displayed when the application fails to bootstrap or encounters FFI stream errors.
+class _BootstrapErrorScreen extends StatelessWidget {
+  final String message;
+
+  const _BootstrapErrorScreen({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = DesignTokens.of(AppMode.init);
+    return Scaffold(
+      backgroundColor: tokens.colors.canvas,
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.all(DesignTokens.spacing.lg),
+          child: Text(
+            message,
+            style: DesignTokens.typography.body.copyWith(
+              color: tokens.colors.ink,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Switcher widget that animates app mode transitions using a radial reveal.
 class AppModeRevealSwitcher extends StatefulWidget {
   final AppMode mode;
 
@@ -124,13 +193,13 @@ class _AppModeRevealSwitcherState extends State<AppModeRevealSwitcher>
     final curr = _currentMode!;
 
     if (prev == null) {
-      return _buildAppForMode(curr);
+      return MyApp._buildAppForMode(curr);
     }
 
     return Stack(
       textDirection: TextDirection.ltr,
       children: [
-        IgnorePointer(ignoring: true, child: _buildAppForMode(prev)),
+        IgnorePointer(ignoring: true, child: MyApp._buildAppForMode(prev)),
         AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
@@ -139,65 +208,14 @@ class _AppModeRevealSwitcherState extends State<AppModeRevealSwitcher>
               child: child,
             );
           },
-          child: _buildAppForMode(curr),
+          child: MyApp._buildAppForMode(curr),
         ),
       ],
     );
   }
 }
 
-Widget _buildPageForMode(AppMode mode) {
-  switch (mode) {
-    case AppMode.init:
-      return const OnboardingScreen();
-    case AppMode.coldWallet:
-      return const ColdWalletHome();
-    case AppMode.hotWallet:
-      return const HotWalletHome();
-  }
-}
-
-final Map<AppMode, GlobalKey> _appKeys = {
-  AppMode.init: GlobalKey(debugLabel: 'init_app'),
-  AppMode.coldWallet: GlobalKey(debugLabel: 'cold_app'),
-  AppMode.hotWallet: GlobalKey(debugLabel: 'hot_app'),
-};
-
-Widget _buildAppForMode(AppMode mode) {
-  return _buildApp(mode: mode, home: _buildPageForMode(mode));
-}
-
-Widget _buildApp({required AppMode mode, required Widget home}) {
-  final tokens = DesignTokens.of(mode);
-  return DesignTheme(
-    key: _appKeys[mode],
-    tokens: tokens,
-    child: MaterialApp(
-      title: 'Janus Wallet',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'Inter',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: tokens.colors.primary,
-          primary: tokens.colors.primary,
-          surface: tokens.colors.canvas,
-        ),
-        useMaterial3: true,
-      ),
-      home: home,
-      builder: (context, child) {
-        return Stack(
-          children: [
-            // ignore: use_null_aware_elements
-            if (child != null) child,
-            const GlobalLoadingOverlay(),
-          ],
-        );
-      },
-    ),
-  );
-}
-
+/// A clipper that shapes a child into an expanding circle, providing a radial reveal effect.
 class RadialRevealClipper extends CustomClipper<Path> {
   final double fraction;
 

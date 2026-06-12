@@ -4,7 +4,7 @@ use rx_rust::{
     observable::{observable_ext::ObservableExt, Observable},
     observer::Termination,
 };
-use std::sync::Arc;
+use std::{fmt::Debug, sync::Arc};
 
 #[frb(opaque)]
 pub struct BridgeSubscription {
@@ -18,7 +18,7 @@ pub(crate) fn subscribe_with_bridge_callback<T, E, OE>(
 ) -> BridgeSubscription
 where
     T: Send + Sync + 'static,
-    E: Send + Sync + 'static,
+    E: Debug + Send + Sync + 'static,
     OE: Observable<'static, 'static, T, E>,
 {
     let on_next = Arc::new(on_next);
@@ -38,7 +38,10 @@ where
             tokio::spawn(async move {
                 on_termination(match termination {
                     Termination::Completed => None,
-                    Termination::Error(error) => Some(error),
+                    Termination::Error(error) => {
+                        log::error!("Bridge on_termination error: {:?}", error);
+                        Some(error)
+                    }
                 })
                 .await
             });

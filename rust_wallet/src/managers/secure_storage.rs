@@ -65,24 +65,18 @@ impl SecureStorageManager {
 
 impl SecureStorage for SecureStorageManager {
     async fn write(&self, key: String, data: Option<Vec<u8>>) -> Result<(), SecureStorageError> {
-        log::debug!("Secure storage write: {}={:?}", key, data);
-        (self.writer)(key, data).await.inspect_err(|e| {
-            log::error!("write to secure storage error: {}", e);
-        })
+        log::warn!("Secure storage write: {}", key);
+        (self.writer)(key, data).await
     }
 
     async fn read(&self, key: String) -> Result<Option<Vec<u8>>, SecureStorageError> {
-        log::debug!("Secure storage read: {}", key);
-        (self.reader)(key).await.inspect_err(|e| {
-            log::error!("read from secure storage error: {}", e);
-        })
+        log::warn!("Secure storage read: {}", key);
+        (self.reader)(key).await
     }
 
     async fn clean(&self) -> Result<(), SecureStorageError> {
         log::warn!("Secure storage clean");
-        (self.cleaner)().await.inspect_err(|e| {
-            log::error!("clean secure storage error: {}", e);
-        })
+        (self.cleaner)().await
     }
 }
 

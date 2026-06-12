@@ -9,7 +9,6 @@ use sea_orm::{
     PrimaryKeyTrait,
 };
 use std::{
-    any::type_name_of_val,
     convert::Infallible,
     ops::{Deref, DerefMut},
     path::{Path, PathBuf},
@@ -141,10 +140,8 @@ impl Repository for DBManager {
         async move {
             match T::find_by_id(0)
                 .one(connection.read().await.deref())
-                .await
-                .inspect_err(|e| {
-                    log::error!("read from db error: {}", e);
-                })? {
+                .await?
+            {
                 Some(model) => Ok(model),
                 None => Ok(T::Model::default()),
             }
@@ -160,7 +157,6 @@ impl Repository for DBManager {
         T::Model: IntoActiveModel<T::ActiveModel>,
         T::ActiveModel: Send,
     {
-        log::debug!("write [{}] to db: {:#?}", type_name_of_val(&model), model);
         let connection = self.connection.clone();
         async move {
             let active_model = model.into_active_model();
@@ -175,18 +171,10 @@ impl Repository for DBManager {
                 Ok(_) => Ok(()),
                 // 2. If it fails because the row does not exist, insert it
                 Err(sea_orm::DbErr::RecordNotUpdated) => {
-                    active_model
-                        .insert(connection.read().await.deref())
-                        .await
-                        .inspect_err(|e| {
-                            log::error!("insert to db error: {}", e);
-                        })?;
+                    active_model.insert(connection.read().await.deref()).await?;
                     Ok(())
                 }
-                Err(e) => {
-                    log::error!("update to db error: {}", e);
-                    Err(RepositoryError::DBError(e))
-                }
+                Err(e) => Err(RepositoryError::DBError(e)),
             }
         }
     }
@@ -201,17 +189,11 @@ impl Repository for DBManager {
             let connection = lock.deref_mut();
 
             // close db connection
-            connection.clone().close().await.inspect_err(|e| {
-                log::error!("close db connection error: {}", e);
-            })?;
+            connection.clone().close().await?;
 
             // remove db file
             if let Some(working_path) = &working_path {
-                tokio::fs::remove_file(working_path.join(DB_NAME))
-                    .await
-                    .inspect_err(|e| {
-                        log::error!("remove db file error: {}", e);
-                    })?;
+                tokio::fs::remove_file(working_path.join(DB_NAME)).await?;
             }
 
             // reconnect

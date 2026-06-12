@@ -117,7 +117,6 @@ where
                     .await?;
                 Ok(TOTAL_ATTEMPTS - number_of_pin_failed)
             } else {
-                log::warn!("PIN attempts exhausted — signalling app reset");
                 self.app_reset_required.clone().on_next(());
                 Ok(0)
             }

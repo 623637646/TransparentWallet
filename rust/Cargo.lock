@@ -2307,6 +2307,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "flutter_rust_bridge",
+ "log",
  "rust_wallet",
  "rx-rust",
  "tokio",

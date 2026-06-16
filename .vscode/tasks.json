@@ -16,6 +16,25 @@
 				"kind": "test",
 				"isDefault": true
 			}
+		},
+		{
+			"label": "Clean Flutter & Rust",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-c",
+				"if [ -f pubspec.yaml ]; then echo \"Cleaning Flutter project in the root directory...\"; flutter clean; fi; shopt -s nullglob; for dir in */; do if [ -f \"$dir\"Cargo.toml ]; then echo \"Cleaning Rust project: $dir\"; (cd \"$dir\" && cargo clean); fi; if [ -f \"$dir\"pubspec.yaml ]; then echo \"Cleaning Flutter project: $dir\"; (cd \"$dir\" && flutter clean); fi; done"
+			],
+			"problemMatcher": [],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"group": "none"
 		}
 	]
 }

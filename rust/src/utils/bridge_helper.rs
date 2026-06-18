@@ -14,7 +14,7 @@ pub struct BridgeSubscription {
 pub(crate) fn subscribe_with_bridge_callback<T, E, OE>(
     observable_builder: impl FnOnce() -> OE,
     on_next: impl Fn(T) -> DartFnFuture<()> + Send + Sync + 'static,
-    on_termination: impl Fn(Option<E>) -> DartFnFuture<()> + Send + Sync + 'static,
+    on_termination: impl FnOnce(Option<E>) -> DartFnFuture<()> + Send + Sync + 'static,
 ) -> BridgeSubscription
 where
     T: Send + Sync + 'static,

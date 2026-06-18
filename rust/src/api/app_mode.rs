@@ -16,7 +16,7 @@ impl Context {
     pub async fn app_mode_stream(
         &self,
         on_next: impl Fn(AppMode) -> DartFnFuture<()> + Send + Sync + 'static,
-        on_termination: impl Fn(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
+        on_termination: impl FnOnce(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
             || {

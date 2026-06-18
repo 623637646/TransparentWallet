@@ -17,7 +17,7 @@ impl Context {
     pub async fn language_stream(
         &self,
         on_next: impl Fn(Option<Language>) -> DartFnFuture<()> + Send + Sync + 'static,
-        on_termination: impl Fn(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
+        on_termination: impl FnOnce(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
             || {
@@ -50,7 +50,7 @@ impl Context {
         text_id: String,
         args: Option<HashMap<String, String>>,
         on_next: impl Fn(String) -> DartFnFuture<()> + Send + Sync + 'static,
-        on_termination: impl Fn(Option<String>) -> DartFnFuture<()> + Send + Sync + 'static,
+        on_termination: impl FnOnce(Option<String>) -> DartFnFuture<()> + Send + Sync + 'static,
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
             || {

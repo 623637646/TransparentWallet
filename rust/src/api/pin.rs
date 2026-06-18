@@ -15,7 +15,7 @@ impl Context {
     pub async fn has_pin_stream(
         &self,
         on_next: impl Fn(bool) -> DartFnFuture<()> + Send + Sync + 'static,
-        on_termination: impl Fn(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
+        on_termination: impl FnOnce(Option<BridgeNever>) -> DartFnFuture<()> + Send + Sync + 'static,
     ) -> BridgeSubscription {
         subscribe_with_bridge_callback(
             || {

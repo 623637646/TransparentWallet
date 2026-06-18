@@ -27,7 +27,7 @@ pub async fn look_up_text(
     text_id: String,
     args: Option<HashMap<String, String>>,
     on_next: impl Fn(String) -> DartFnFuture<()> + Send + Sync + 'static,
-    on_termination: impl Fn(Option<String>) -> DartFnFuture<()> + Send + Sync + 'static,
+    on_termination: impl FnOnce(Option<String>) -> DartFnFuture<()> + Send + Sync + 'static,
 ) -> BridgeSubscription
 ```
 On the Dart side, the generated class will expose a single method `lookUpText` accepting `textId` and an optional `args` map.
